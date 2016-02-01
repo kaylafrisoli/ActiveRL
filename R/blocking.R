@@ -14,6 +14,18 @@ BlockByVariable <- function(records, var.name) {
 
 
 
+#' Compare n records
+#'
+#' Number of comparisons made in n records
+#'
+#' @param n Number of records you want to compare
+#' @return The total number of pair-comparisons in n records
+#' @examples
+#' Comparisons(dim(iris)[1])
+Comparisons <- function(n){
+  (n * (n-1)) / 2
+}
+
 
 
 #' Block by substrings
@@ -38,11 +50,10 @@ BlockBySubstr <- function(records, var.names, n.chars=1) {
   } else {
     blocks <- as.factor(apply(new.mat, 1, paste, collapse=""))
   }
-  results <- list(blocks=blocks, factors=as.integer(blocks))
+  reduction.ratio <- 100*sum(Comparisons(as.numeric(table(blocks))))/ Comparisons(dim(records)[1])
+  results <- list(blocks=blocks, factors=as.integer(blocks), reduction.ratio=reduction.ratio)
   return(results)
 }
-
-
 
 
 
