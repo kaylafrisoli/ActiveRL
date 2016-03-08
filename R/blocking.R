@@ -50,7 +50,7 @@ BlockBySubstr <- function(records, var.names, n.chars=1) {
   } else {
     blocks <- as.factor(apply(new.mat, 1, paste, collapse=""))
   }
-  reduction.ratio <- 100*sum(Comparisons(as.numeric(table(blocks))))/ Comparisons(dim(records)[1])
+  reduction.ratio <- 100 * (1 - (sum(Comparisons(as.numeric(table(blocks))))/ Comparisons(dim(records)[1])))
   results <- list(blocks=blocks, factors=as.integer(blocks), reduction.ratio=reduction.ratio)
   return(results)
 }
