@@ -12,7 +12,7 @@ BlockByVariable(records, var.name)
 \item{var.name}{String of variable you want to block by}
 }
 \value{
-A printed vector of integers coresponding to the block
+A vector of integers coresponding to the block assignment
 }
 \description{
 Block a dataset by the factor levels of one variable
