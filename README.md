@@ -123,7 +123,7 @@ compare.train <- CompareAllBlocksInLoopPC(blockTrain$DataSplit,
 options(cores = 8)
 registerDoMC()
 
-compare.test <- CompareAllBlocksInLoop(blockTest$DataSplit,
+compare.test <- CompareAllBlocksInLoopPC(blockTest$DataSplit,
                                               blockTest$IdSplit,
                                               variables.to.match = c("fname_c1",
                                                                      "lname_c1",
