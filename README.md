@@ -30,11 +30,15 @@ ids <- identity.RLdata500
 
 ```
 
+#### Split into training and testing 
+
 First we will evenly split our data into testing and training data.
 
 ```R
 splitRL <- SplitIntoTrainTest(RLdata500, ids, seed=16, prob.of.train = .5)
 ```
+
+#### Block
 
 Then we will block both of our training and testing data by birth month.
 
@@ -55,8 +59,9 @@ blockTest <- BlockRlData(splitRL$testing.data,
 
 ```
 
+#### Make comparisons
 
-We then need to make comparisons between records, within each block. We will do this all at once but we could parallelize this process across blocks, since they are independent. We are going to compare each field in `variables.to.match` using the functions in `string.comparators`. These should match up respectively. 
+We then need to make comparisons between records, within each block. We will do this all at once at first and then we will parallelize this process across blocks, since they are independent. We are going to compare each field in `variables.to.match` using the functions in `string.comparators`. These should match up respectively. 
 
 ```R
 compare.train <- CompareAllBlocksInLoop(blockTrain$DataSplit,
@@ -90,6 +95,52 @@ compare.test <- CompareAllBlocksInLoop(blockTest$DataSplit,
 
 ```
 
+#### Make comparisons in parallel 
+
+Running the loop across cores:
+
+```R
+
+library(doMC)
+options(cores = 8)
+registerDoMC()
+
+compare.train <- CompareAllBlocksInLoopPC(blockTrain$DataSplit,
+                                              blockTrain$IdSplit,
+                                              variables.to.match = c("fname_c1",
+                                                                    "lname_c1",
+                                                                    "by",
+                                                                    "bm",
+                                                                    "bd"),
+                                              string.comparators = c("jarowinkler",
+                                                                    "jarowinkler",
+                                                                    "AbsoluteDifference",
+                                                                    "AbsoluteDistance",
+                                                                    "AbsoluteDistance"),
+                                              record.ids.to.keep=c("PreSplitRecord", "PreBlockRecord"))
+                                              
+                                              
+options(cores = 8)
+registerDoMC()
+
+compare.test <- CompareAllBlocksInLoop(blockTest$DataSplit,
+                                              blockTest$IdSplit,
+                                              variables.to.match = c("fname_c1",
+                                                                     "lname_c1",
+                                                                     "by",
+                                                                     "bm",
+                                                                     "bd"),
+                                              string.comparators = c("jarowinkler",
+                                                                     "jarowinkler",
+                                                                     "AbsoluteDifference",
+                                                                     "AbsoluteDistance",
+                                                                     "AbsoluteDistance"),
+                                              record.ids.to.keep=c("PreSplitRecord", "PreBlockRecord"))
+
+```
+
+#### Model
+
 
 We then merge or training comparisons and build a model on the compaison data. 
 
@@ -103,6 +154,8 @@ model <- glm(True_Match ~ fname_c1.jar + lname_c1.jar + by.Abs + bm.Abs + bd.Abs
 
 ```
 
+#### Predict, cluster, assign unique ids
+
 
 We can then calculate the probability that records in our testing data match and hierarchically cluster based on these probabilities. We end up with unique ids for our testing data.
 
@@ -111,6 +164,8 @@ We can then calculate the probability that records in our testing data match and
 get.test.ids.by.block <- AllBlocksHclustCutGLM(model, block.compare.test, blockTest$DataSplit, .5)
 
 ```
+
+#### Assess error
 
 We may want to check how well we did.
 
