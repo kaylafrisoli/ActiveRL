@@ -59,7 +59,7 @@ HclustCutGLM <- function(model, comparison.test, fullTestRL, cut.threshold){
 }
 
 
-
+#' @export
 AllBlocksHclustCutGLM <- function(model, comparison.test.blocks, test.data.blocks, cut.threshold, current.record.names=NULL){
 
   if(is.null(current.record.names)){

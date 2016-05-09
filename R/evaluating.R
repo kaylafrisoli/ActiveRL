@@ -1,5 +1,5 @@
 
-
+#' @export
 evaluation <- function(true.matches, predicted.matches){
   # In some situations there will only be matches or non-matches
   # So we must control for this

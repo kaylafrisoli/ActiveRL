@@ -368,6 +368,7 @@ StandardizedAbsoluteDifferenceY <- function(vec1, vec2){
 #' @param record.ids.to.keep a vector of strings containing the name of any record id that should be kept. e.g. PreSplitRecord or  PreBlockRecord
 #'
 #' @return A list of data frames containing the comparison matrix for each block
+#' @export
 CompareAllBlocksInLoop <- function(Dsplit,
                                    Idsplit=NULL,
                                    variables.to.match=NULL,
@@ -401,6 +402,54 @@ return(block.comparison.lists)
 
 
 
+#' Compare unique combinations of records in all blocks using parallel structure
+#'
+#' Compare unique combinations of records within every block of a dataset using parallel structure
+#'
+#' @param Dsplit a list of dataset containing records to be matched for each block
+#'
+#' @param Idsplit a list of vectors containing the unique ids corresponding to each block
+#'
+#' @param variables.to.match a vector of strings containing the variables of interest for this linkage. Default is all variables in RLdata. Can repeat variables to use different comparators on same variable.
+#'
+#' @param string.comparators a vector of strings containing the comparator to be used for each variable. Default is jarowinkler for all. Should be same length as variables.to.match.
+#'
+#' @param record.ids.to.keep a vector of strings containing the name of any record id that should be kept. e.g. PreSplitRecord or  PreBlockRecord
+#'
+#' @return A list of data frames containing the comparison matrix for each block
+#' @export
+CompareAllBlocksInLoopPC <- function(Dsplit,
+                                     Idsplit=NULL,
+                                     variables.to.match=NULL,
+                                     string.comparators=NULL,
+                                     record.ids.to.keep=NULL){
+
+  block.comparison.lists <- vector("list", length(Dsplit))
+
+  foreach(i = seq_along(Dsplit)) %dopar% {
+
+    #   ids.for.loop <- vector("list", length(Dsplit))
+    if(is.null(Idsplit)){
+      ids.for.loop <- NULL
+    } else{
+      ids.for.loop <- Idsplit[[i]]
+    }
+
+    comparison.in.block <- CompareUniqueCombinations(as.data.frame(Dsplit[[i]]),
+                                                     as.vector(ids.for.loop),
+                                                     variables.to.match = variables.to.match,
+                                                     string.comparators = string.comparators,
+                                                     record.ids.to.keep = record.ids.to.keep)
+
+    block.comparison.lists[[i]] <- as.data.frame(comparison.in.block)
+  }
+
+  return(block.comparison.lists)
+
+}
+
+
+
 #make sure all elements of block.comparison.list are a data.frame
 
 
@@ -410,6 +459,7 @@ return(block.comparison.lists)
 #' @param block.lists a list of datasets
 #'
 #' @return A data frame with all elements of block.lists merged together
+#' @export
 MergeAllBlocks <- function(block.lists){
 
   full.comparisons <- plyr::rbind.fill(block.lists, rbind)

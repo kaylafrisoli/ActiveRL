@@ -91,12 +91,14 @@ IsItAMatch <- function(record1, record2){
 #' \item{comparisons}{a data frame containing the comparisons of RLdata}
 #' \item{tested.comparisons}{a data frame containing the comparison values of records the user tested}
 #' \item{tested.data}{a data frame containing the original data of records the user tested}
+#' @export
 BuildATrainingDataset <- function(RLdata,
                                   n.pairs.to.test,
                                   variables.to.match=NULL,
                                   string.comparators=NULL,
                                   current.record.ids=NULL,
-                                  standardized.variables=NULL){
+                                  standardized.variables=NULL,
+                                  seed=NULL){
 
   if(is.null(current.record.ids)){
     current.record.ids <- c("CurrentRecord1", "CurrentRecord2")
@@ -104,12 +106,17 @@ BuildATrainingDataset <- function(RLdata,
     current.record.ids <- current.record.ids
   }
 
+  if(is.null(seed)){
+    seed <- sample(1:100000, 1)
+  } else{
+    seed <- seed
+  }
+
+
   comparisons <- CompareUniqueCombinations(RLdata = RLdata,
                                            variables.to.match = variables.to.match,
                                            string.comparators = string.comparators)
   comparisons <- as.data.frame(comparisons)
-
-  print(head(comparisons))
 
   if(is.null(standardized.variables)){
     factor.vars <- names(which(sapply(RLdata[, unique(variables.to.match)], is.factor) == TRUE))
@@ -139,6 +146,8 @@ BuildATrainingDataset <- function(RLdata,
 
   mid <- n.pairs.to.test - length(c(bot, top))
 
+  set.seed(seed)
+
 
   rest <- sample((max(bot) + 1):(min(top) -1), mid, replace = FALSE)
 
@@ -167,7 +176,8 @@ BuildATrainingDataset <- function(RLdata,
 
   results <- list(comparisons=comparisons,
                   tested.comparisons=comparisons[sims.to.test$n, ],
-                  tested.data=RLdata[unique(orig.recs), ])
+                  tested.data=RLdata[unique(orig.recs), ],
+                  seed=seed)
   return(results)
 
 }

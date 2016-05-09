@@ -22,6 +22,7 @@
 #' \item{testing.data}{the testing dataset}
 #' \item{train.ids}{unique ids for the training dataset}
 #' \item{test.ids}{unique ids for the testing dataset}
+#' @export
 SplitIntoTrainTest <- function(RLdata,
                                unique.ids,
                                seed=NULL,
