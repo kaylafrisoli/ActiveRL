@@ -28,5 +28,6 @@ Block a record linkage dataset by substrings of the variables in the dataset
 BlockBySubstr(iris, "Species") #identifies 2 blocks
 BlockBySubstr(iris, "Species", 2) #identifies 3 blocks
 BlockBySubstr(iris, c("Species", "Sepal.Length"), c(2,1)) #identifies 3 blocks
+
 }
 

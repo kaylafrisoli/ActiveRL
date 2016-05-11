@@ -89,6 +89,8 @@ BlockBySubstr <- function(records, var.names, n.chars=NULL) {
 #' BlockBySubstr(iris, "Species") #identifies 2 blocks
 #' BlockBySubstr(iris, "Species", 2) #identifies 3 blocks
 #' BlockBySubstr(iris, c("Species", "Sepal.Length"), c(2,1)) #identifies 3 blocks
+#'
+#' @export
 BlockRlData <- function(RLdata,
                         var.names,
                         n.chars=NULL,
