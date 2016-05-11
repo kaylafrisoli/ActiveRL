@@ -6,7 +6,7 @@
 \usage{
 BuildATrainingDataset(RLdata, n.pairs.to.test, variables.to.match = NULL,
   string.comparators = NULL, current.record.ids = NULL,
-  standardized.variables = NULL)
+  standardized.variables = NULL, seed = NULL)
 }
 \arguments{
 \item{RLdata}{a data frame containing the records to be matched}
