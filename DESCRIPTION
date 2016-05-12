@@ -10,4 +10,5 @@ LazyData: true
 RoxygenNote: 5.0.1
 Imports: gtools,
     plyr,
-    magrittr
+    magrittr,
+    doMC

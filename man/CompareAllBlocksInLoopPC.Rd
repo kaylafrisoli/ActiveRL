@@ -5,7 +5,7 @@
 \title{Compare unique combinations of records in all blocks using parallel structure}
 \usage{
 CompareAllBlocksInLoopPC(Dsplit, Idsplit = NULL, variables.to.match = NULL,
-  string.comparators = NULL, record.ids.to.keep = NULL)
+  string.comparators = NULL, record.ids.to.keep = NULL, num.cores = NULL)
 }
 \arguments{
 \item{Dsplit}{a list of dataset containing records to be matched for each block}

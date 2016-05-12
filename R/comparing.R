@@ -422,9 +422,21 @@ CompareAllBlocksInLoopPC <- function(Dsplit,
                                      Idsplit=NULL,
                                      variables.to.match=NULL,
                                      string.comparators=NULL,
-                                     record.ids.to.keep=NULL){
+                                     record.ids.to.keep=NULL,
+                                     num.cores=NULL){
+
+  if(is.null(num.cores)){
+    num.cores <- 1
+  } else{
+    num.cores <- num.cores
+  }
+
+  print(num.cores)
 
   block.comparison.lists <- vector("list", length(Dsplit))
+
+  options(cores = num.cores)
+  registerDoMC()
 
   foreach(i = seq_along(Dsplit)) %dopar% {
 
@@ -440,6 +452,8 @@ CompareAllBlocksInLoopPC <- function(Dsplit,
                                                      variables.to.match = variables.to.match,
                                                      string.comparators = string.comparators,
                                                      record.ids.to.keep = record.ids.to.keep)
+
+    print(head(comparison.in.block))
 
     block.comparison.lists[[i]] <- as.data.frame(comparison.in.block)
   }

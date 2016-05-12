@@ -102,40 +102,76 @@ Running the loop across cores:
 ```R
 
 library(doMC)
-options(cores = 8)
+options(cores = 6)
 registerDoMC()
 
-compare.train <- CompareAllBlocksInLoopPC(blockTrain$DataSplit,
-                                              blockTrain$IdSplit,
-                                              variables.to.match = c("fname_c1",
-                                                                    "lname_c1",
-                                                                    "by",
-                                                                    "bm",
-                                                                    "bd"),
-                                              string.comparators = c("jarowinkler",
-                                                                    "jarowinkler",
-                                                                    "AbsoluteDifference",
-                                                                    "AbsoluteDistance",
-                                                                    "AbsoluteDistance"),
-                                              record.ids.to.keep=c("PreSplitRecord", "PreBlockRecord"))
+
+Dsplit  <- blockTrain$DataSplit
+Idsplit <- blockTrain$IdSplit
+variables.to.match <- c("fname_c1",
+                        "lname_c1",
+                        "by",
+                        "bm",
+                        "bd")
+string.comparators <- c("jarowinkler",
+                        "jarowinkler",
+                        "AbsoluteDifference",
+                        "AbsoluteDistance",
+                        "AbsoluteDistance")
+record.ids.to.keep <- c("PreSplitRecord", "PreBlockRecord")
+
+block.comparison.lists <- vector("list", length(Dsplit))
+
+foreach(i = seq_along(Dsplit)) %dopar% {
+
+    #   ids.for.loop <- vector("list", length(Dsplit))
+    if(is.null(Idsplit)){
+      ids.for.loop <- NULL
+    } else{
+      ids.for.loop <- Idsplit[[i]]
+    }
+
+    comparison.in.block <- CompareUniqueCombinations(as.data.frame(Dsplit[[i]]),
+                                                     as.vector(ids.for.loop),
+                                                     variables.to.match = variables.to.match,
+                                                     string.comparators = string.comparators,
+                                                     record.ids.to.keep = record.ids.to.keep)
+
+    block.comparison.lists[[i]] <- as.data.frame(comparison.in.block)
+}
+  
+compare.train <- block.comparison.lists
+
                                               
-                                              
-options(cores = 8)
+options(cores = 6)
 registerDoMC()
 
-compare.test <- CompareAllBlocksInLoopPC(blockTest$DataSplit,
-                                              blockTest$IdSplit,
-                                              variables.to.match = c("fname_c1",
-                                                                     "lname_c1",
-                                                                     "by",
-                                                                     "bm",
-                                                                     "bd"),
-                                              string.comparators = c("jarowinkler",
-                                                                     "jarowinkler",
-                                                                     "AbsoluteDifference",
-                                                                     "AbsoluteDistance",
-                                                                     "AbsoluteDistance"),
-                                              record.ids.to.keep=c("PreSplitRecord", "PreBlockRecord"))
+Dsplit  <- blockTest$DataSplit
+Idsplit <- blockTest$IdSplit
+
+block.comparison.lists <- vector("list", length(Dsplit))
+
+foreach(i = seq_along(Dsplit)) %dopar% {
+
+    #   ids.for.loop <- vector("list", length(Dsplit))
+    if(is.null(Idsplit)){
+      ids.for.loop <- NULL
+    } else{
+      ids.for.loop <- Idsplit[[i]]
+    }
+
+    comparison.in.block <- CompareUniqueCombinations(as.data.frame(Dsplit[[i]]),
+                                                     as.vector(ids.for.loop),
+                                                     variables.to.match = variables.to.match,
+                                                     string.comparators = string.comparators,
+                                                     record.ids.to.keep = record.ids.to.keep)
+
+    block.comparison.lists[[i]] <- as.data.frame(comparison.in.block)
+  }
+  
+compare.test <- block.comparison.lists
+
+   
 
 ```
 
