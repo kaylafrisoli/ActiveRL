@@ -36,6 +36,8 @@ First we will evenly split our data into testing and training data.
 
 ```R
 splitRL <- SplitIntoTrainTest(RLdata500, ids, seed=16, prob.of.train = .5)
+?SplitIntoTrainTest
+
 ```
 
 #### Block
@@ -122,7 +124,8 @@ record.ids.to.keep <- c("PreSplitRecord", "PreBlockRecord")
 
 block.comparison.lists <- vector("list", length(Dsplit))
 
-foreach(i = seq_along(Dsplit)) %dopar% {
+
+block.comparison.lists <- foreach(i = seq_along(Dsplit), .export="block.comparison.lists") %dopar% {
 
     #   ids.for.loop <- vector("list", length(Dsplit))
     if(is.null(Idsplit)){
@@ -131,13 +134,12 @@ foreach(i = seq_along(Dsplit)) %dopar% {
       ids.for.loop <- Idsplit[[i]]
     }
 
-    comparison.in.block <- CompareUniqueCombinations(as.data.frame(Dsplit[[i]]),
+    comparison.in.block <- as.data.frame(CompareUniqueCombinations(as.data.frame(Dsplit[[i]]),
                                                      as.vector(ids.for.loop),
                                                      variables.to.match = variables.to.match,
                                                      string.comparators = string.comparators,
-                                                     record.ids.to.keep = record.ids.to.keep)
+                                                     record.ids.to.keep = record.ids.to.keep))
 
-    block.comparison.lists[[i]] <- as.data.frame(comparison.in.block)
 }
   
 compare.train <- block.comparison.lists
@@ -151,7 +153,7 @@ Idsplit <- blockTest$IdSplit
 
 block.comparison.lists <- vector("list", length(Dsplit))
 
-foreach(i = seq_along(Dsplit)) %dopar% {
+block.comparison.lists <- foreach(i = seq_along(Dsplit)) %dopar% {
 
     #   ids.for.loop <- vector("list", length(Dsplit))
     if(is.null(Idsplit)){
@@ -160,13 +162,12 @@ foreach(i = seq_along(Dsplit)) %dopar% {
       ids.for.loop <- Idsplit[[i]]
     }
 
-    comparison.in.block <- CompareUniqueCombinations(as.data.frame(Dsplit[[i]]),
+    comparison.in.block <- as.data.frame(CompareUniqueCombinations(as.data.frame(Dsplit[[i]]),
                                                      as.vector(ids.for.loop),
                                                      variables.to.match = variables.to.match,
                                                      string.comparators = string.comparators,
-                                                     record.ids.to.keep = record.ids.to.keep)
+                                                     record.ids.to.keep = record.ids.to.keep))
 
-    block.comparison.lists[[i]] <- as.data.frame(comparison.in.block)
   }
   
 compare.test <- block.comparison.lists
@@ -182,7 +183,7 @@ We then merge or training comparisons and build a model on the compaison data.
 
 ```R
 
-training.merged <- MergeAllBlocks(block.compare.train)
+training.merged <- MergeAllBlocks(compare.train)
 
 model <- glm(True_Match ~ fname_c1.jar + lname_c1.jar + by.Abs + bm.Abs + bd.Abs,
              data=training.merged,
@@ -197,7 +198,7 @@ We can then calculate the probability that records in our testing data match and
 
 ```R
 
-get.test.ids.by.block <- AllBlocksHclustCutGLM(model, block.compare.test, blockTest$DataSplit, .5)
+get.test.ids.by.block <- AllBlocksHclustCutGLM(model, compare.test, blockTest$DataSplit, .5)
 
 ```
 

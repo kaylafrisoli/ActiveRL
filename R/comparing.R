@@ -433,14 +433,13 @@ CompareAllBlocksInLoopPC <- function(Dsplit,
     num.cores <- num.cores
   }
 
-  print(num.cores)
 
   block.comparison.lists <- vector("list", length(Dsplit))
 
   options(cores = num.cores)
   registerDoMC()
 
-  foreach(i = seq_along(Dsplit)) %dopar% {
+  block.comparison.lists <- foreach(i = seq_along(Dsplit)) %dopar% {
 
     #   ids.for.loop <- vector("list", length(Dsplit))
     if(is.null(Idsplit)){
@@ -449,15 +448,12 @@ CompareAllBlocksInLoopPC <- function(Dsplit,
       ids.for.loop <- Idsplit[[i]]
     }
 
-    comparison.in.block <- CompareUniqueCombinations(as.data.frame(Dsplit[[i]]),
+    comparison.in.block <- as.data.frame(CompareUniqueCombinations(as.data.frame(Dsplit[[i]]),
                                                      as.vector(ids.for.loop),
                                                      variables.to.match = variables.to.match,
                                                      string.comparators = string.comparators,
-                                                     record.ids.to.keep = record.ids.to.keep)
+                                                     record.ids.to.keep = record.ids.to.keep))
 
-    print(head(comparison.in.block))
-
-    block.comparison.lists[[i]] <- as.data.frame(comparison.in.block)
   }
 
   return(block.comparison.lists)
