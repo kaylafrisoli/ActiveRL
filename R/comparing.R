@@ -57,6 +57,8 @@ GetPairwiseMatchesFromIDs <- function(combinations.of.original.data,
 #' @param string.comparators Vector of strings containing the comparators wanted for each variable. Default is jarowinkler. Should be same length as variables.to.match.
 #'
 #' @return A matrix of comparator values of each combination of records for the variables of interest. Also includes binary matches and the combinations of records.
+#'
+#' @export
 CompareUniqueCombinations <- function(RLdata,
                                       unique.ids=NULL,
                                       variables.to.match=NULL,
