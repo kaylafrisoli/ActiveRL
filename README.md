@@ -125,7 +125,7 @@ record.ids.to.keep <- c("PreSplitRecord", "PreBlockRecord")
 block.comparison.lists <- vector("list", length(Dsplit))
 
 
-block.comparison.lists <- foreach(i = seq_along(Dsplit), .export="block.comparison.lists") %dopar% {
+block.comparison.lists <- foreach(i = seq_along(Dsplit)) %dopar% {
 
     #   ids.for.loop <- vector("list", length(Dsplit))
     if(is.null(Idsplit)){
