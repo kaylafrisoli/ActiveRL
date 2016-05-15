@@ -15,12 +15,15 @@ install_github('kaylafrisoli/BasicRL')
 
 ## Description
 
+Record linkage is the process of identifying records corresponding to unique entities across multiple data sets. This is necessary because records within a data set may not share a unique identifier, such as social security number or licence plate number. Record linkage is a common problem in many fields. For example, if two airlines merge they may want to link their flight records to gain information on their customers. They would need to decide if Sam Smith with birth date 05/15/86 is the same person as Samuel Smyth with birth date 05/16/86. Record linkage is especially important for government organizations like the U.S. Census Bureau, who require accurate linkages of information across their many data sources.
+
 BasicRL provides the tools to perform record linkage on a data set of records. If you have training data you can utilize current supervised learning methods to create unique ids for your testing data. If not, you can create your own training data and then utilize the same methods to create unique ids. 
+
 
 
 ## Record linkage example
 
-We will walk through an example from a dataset built in to the `RecordLinkage` package in R. You will need to install this package if you do not already have it.
+We will walk through an example from a data set built in to the `RecordLinkage` package in R. You will need to install this package if you do not already have it.
 
 ```R
 library(BasicRL)
@@ -178,8 +181,7 @@ compare.test <- block.comparison.lists
 
 #### Model
 
-
-We then merge or training comparisons and build a model on the compaison data. 
+We then merge or training comparisons and build a model on the comparison data. 
 
 ```R
 
@@ -241,6 +243,43 @@ $negative.predictive.value
 
 $accuracy
 [1] 0.9992325
+
+
+```
+
+
+#### Create your own data
+
+```R
+
+createTraining <- BuildATrainingDataset(RLdata500,
+                                        n.pairs.to.test=10,
+                                        variables.to.match = c("fname_c1",
+                                                               "lname_c1",
+                                                               "by",
+                                                               "bm",
+                                                               "bd"),
+                                        string.comparators = c("jarowinkler",
+                                                               "jarowinkler",
+                                                               "AbsoluteDifference",
+                                                               "AbsoluteDistance",
+                                                               "AbsoluteDistance"),
+                                        standardized.variables=c("fname_c1",
+                                                                 "lname_c1"))
+
+
+> createTraining$tested.comparisons
+       fname_c1.jar lname_c1.jar by.Abs bm.Abs bd.Abs True_Match CurrentRecord1 CurrentRecord2 Active_Match
+29        0.0000000    0.0000000     45      6      1         NA              1             30            0
+125       0.0000000    0.0000000     22      2      1         NA              1            126            0
+121282    1.0000000    1.0000000     32      2     11         NA            417            435            0
+122238    1.0000000    1.0000000     16      1      8         NA            429            473            0
+124569    1.0000000    1.0000000      9      1      1         NA            481            490            1
+57032     0.5555556    0.5873016      7      5     15         NA            132            310            0
+85128     0.5972222    0.7703704     39      2     15         NA            218            499            0
+103440    0.4179894    0.6583333     19      2      4         NA            294            305            0
+41309     0.5396825    0.5619048     42      1     12         NA             91            495            0
+66563     0.5000000    0.0000000     38      5     15         NA            159            283            0
 
 
 ```
