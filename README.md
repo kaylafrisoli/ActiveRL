@@ -19,6 +19,7 @@ Record linkage is the process of identifying records corresponding to unique ent
 
 BasicRL provides the tools to perform record linkage on a data set of records. If you have training data you can utilize current supervised learning methods to create unique ids for your testing data. If not, you can create your own training data and then utilize the same methods to create unique ids. 
 
+We build our own training data using an active learning approach that allows users to create their own optimized training datasets for specific record linkage problems. Our algorithm prompts users to label record-pairs for which its predictions are most uncertain, increasing the resulting classifier’s predictive power. There is much work to be done in this section and we are continually learning more about active learning, and how to handle situations wtih imbalanced classes (more record non-matches than record matches).
 
 
 ## Record linkage example
@@ -45,7 +46,7 @@ splitRL <- SplitIntoTrainTest(RLdata500, ids, seed=16, prob.of.train = .5)
 
 #### Block
 
-Then we will block both of our training and testing data by birth month.
+Then we will block both our training and testing data by birth month. In this example we create 12 different data sets, where each one corresponding to a month. This reduces our comparison space and makes computations more feasabile. Each block is independent of one another and therefore we perform record linkage only within each block.
 
 
 ```R
@@ -66,7 +67,7 @@ blockTest <- BlockRlData(splitRL$testing.data,
 
 #### Make comparisons
 
-We then need to make comparisons between records, within each block. We will do this all at once at first and then we will parallelize this process across blocks, since they are independent. We are going to compare each field in `variables.to.match` using the functions in `string.comparators`. These should match up respectively. 
+We then need to make comparisons between records, within each block. We will do this all at once at first and then we will parallelize this process across blocks, because they are independent. We are going to compare each field in `variables.to.match` using the functions in `string.comparators`. These should match up respectively. 
 
 ```R
 compare.train <- CompareAllBlocksInLoop(blockTrain$DataSplit,
