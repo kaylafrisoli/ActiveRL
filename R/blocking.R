@@ -167,7 +167,7 @@ BlockRlDataAdapt <- function(RLdata,
   }
 
   RLdata.loop <- RLdata
-  id.loop <- identity.RLdata10000
+  id.loop <- unique.ids
 
 
   options(expressions = 100000) # really should figure out what this means
