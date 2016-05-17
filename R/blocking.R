@@ -132,7 +132,28 @@ BlockRlData <- function(RLdata,
 
 
 
-# var names in order of importance
+#' Block a record linkage dataset adaptively by importance
+#'
+#' Block a record linkage dataset by substrings of the variables in the dataset
+#'
+#' @param RLdata a data frame containing the records to be matched
+#'
+#' @param var.names a vector of strings containing the variable names you want to block by
+#'
+#' @param n.chars a vector of integers corresponding to the number of the characters you want to compare in each variable of var.names
+#'
+#' @param unique.ids a vector containing the true unique identifiers of the records in RLdata. It should be of length nrow(RLdata)
+#'
+#' @return A list containing blocking information and the blocked data and ids
+#' \item{BlockInfo}{a list of blocking information: blocks, factors, reduction.ratio}
+#' \item{DataSplit}{a list of datasets corresponding to each block}
+#' \item{IdSplit}{a list of vectors containing the unique ids corresponding to each block}
+#' @examples
+#' BlockBySubstr(iris, "Species") #identifies 2 blocks
+#' BlockBySubstr(iris, "Species", 2) #identifies 3 blocks
+#' BlockBySubstr(iris, c("Species", "Sepal.Length"), c(2,1)) #identifies 3 blocks
+#'
+#' @export
 BlockRlDataAdapt <- function(RLdata,
                              var.names,
                              n.chars=NULL,

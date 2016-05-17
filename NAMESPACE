@@ -2,6 +2,7 @@
 
 export(AllBlocksHclustCutGLM)
 export(BlockRlData)
+export(BlockRlDataAdapt)
 export(BuildATrainingDataset)
 export(CompareAllBlocksInLoop)
 export(CompareAllBlocksInLoopPC)
