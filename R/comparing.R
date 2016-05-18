@@ -334,7 +334,7 @@ StandardizedAbsoluteDistanceD <- function(vec1, vec2){
 
 
 AbsoluteDifference <- function(vec1, vec2){
-  ab.dif <- abs(as.numeric(vec1)-as.numeric(vec2))
+  ab.dif <- as.numeric(abs(as.numeric(vec1)-as.numeric(vec2)))
   return(ab.dif)
 }
 
@@ -439,7 +439,7 @@ CompareAllBlocksInLoopPC <- function(Dsplit,
   options(cores = num.cores)
   registerDoMC()
 
-  block.comparison.lists <- foreach(i = seq_along(Dsplit)) %dopar% {
+  block.comparison.lists <- doMC::foreach(i = seq_along(Dsplit)) %dopar% {
 
     #   ids.for.loop <- vector("list", length(Dsplit))
     if(is.null(Idsplit)){
