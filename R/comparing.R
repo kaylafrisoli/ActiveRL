@@ -338,6 +338,11 @@ AbsoluteDifference <- function(vec1, vec2){
   return(ab.dif)
 }
 
+AbsoluteDifferenceDate <- function(vec1, vec2){
+  ab.dif <- as.numeric(abs(difftime(vec1 , vec2)))
+  return(ab.dif)
+}
+
 
 
 StandardizedAbsoluteDifference <- function(vec1, vec2){
