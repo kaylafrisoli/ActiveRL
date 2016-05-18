@@ -52,6 +52,8 @@ ProbItsAMatch <- function(record1, record2){
 #'
 #' @examples
 #' IsItAMatch(RLdata500[1, ], RLdata[2, ])
+#'
+#' @export
 IsItAMatch <- function(record1, record2){
 
   print("If two records do not come from the same entity then they are not a match.")
@@ -182,6 +184,109 @@ BuildATrainingDataset <- function(RLdata,
 
 }
 
+
+
+
+
+
+BuildATrainingDatasetAuto <- function(RLdata,
+                                      n.pairs.to.test,
+                                      unique.ids,
+                                      variables.to.match=NULL,
+                                      string.comparators=NULL,
+                                      current.record.ids=NULL,
+                                      standardized.variables=NULL,
+                                      seed=NULL,
+                                      props.from.each.bin=NULL){
+
+  if(is.null(current.record.ids)){
+    current.record.ids <- c("CurrentRecord1", "CurrentRecord2")
+  } else{
+    current.record.ids <- current.record.ids
+  }
+
+  if(is.null(seed)){
+    seed <- sample(1:100000, 1)
+  } else{
+    seed <- seed
+  }
+
+  if(is.null(props.from.each.bin)){
+    props.from.each.bin <- c(.1, 0, 0, 0, .4, .4, 0, 0, 0, .1)
+  } else{
+    props.from.each.bin <- props.from.each.bin
+  }
+
+
+  comparisons <- CompareUniqueCombinations(RLdata = RLdata,
+                                           unique.ids = unique.ids,
+                                           variables.to.match = variables.to.match,
+                                           string.comparators = string.comparators)
+  comparisons <- as.data.frame(comparisons)
+
+  if(is.null(standardized.variables)){
+    factor.vars <- names(which(sapply(RLdata[, unique(variables.to.match)], is.factor) == TRUE))
+    factor.vars <- variables.to.match %>%
+      unique() %>%
+      RLdata[, .] %>%
+      sapply(., is.factor) %>%
+      which(. == TRUE) %>%
+      names()
+    std.cols <- which(variables.to.match %in% factor.vars)
+  } else{
+    std.cols <- which(variables.to.match %in% standardized.variables)
+  }
+
+
+  average.similarity <- apply(comparisons[, std.cols], 1, mean, na.rm=T)
+  avg.sim.n <- length(average.similarity)
+
+  avg.sims <- data.frame(n=1:avg.sim.n, avg.sim=average.similarity)
+
+  avg.sims.ordered <- avg.sims[order(avg.sims$avg.sim),]
+
+
+  bot <- 1:round(n.pairs.to.test/4)
+
+  top <- (avg.sim.n - round(n.pairs.to.test/4)):avg.sim.n
+
+  mid <- n.pairs.to.test - length(c(bot, top))
+
+  set.seed(seed)
+
+
+  rest <- sample((max(bot) + 1):(min(top) -1), mid, replace = FALSE)
+
+
+  sims.to.test <- avg.sims.ordered[c(bot, top, rest), ]
+
+
+  user.matchYN <- c()
+
+  orig.recs <- c()
+
+  for(i in sims.to.test$n){
+    r1 <- comparisons[i , which(colnames(comparisons) %in% current.record.ids[1])]
+    r2 <- comparisons[i , which(colnames(comparisons) %in% current.record.ids[2])]
+    orig.recs <- c(orig.recs, r1, r2)
+
+    user.mat <- IsItAMatch(RLdata[r1, ], RLdata[r2, ])
+    user.matchYN <- c(user.matchYN, user.mat)
+
+  }
+
+  user.match <- ifelse(user.matchYN == "y", 1, 0)
+
+  comparisons$Active_Match <- rep(NA, nrow(comparisons))
+  comparisons$Active_Match[sims.to.test$n] <- user.match
+
+  results <- list(comparisons=comparisons,
+                  tested.comparisons=comparisons[sims.to.test$n, ],
+                  tested.data=RLdata[unique(orig.recs), ],
+                  seed=seed)
+  return(results)
+
+}
 
 
 
