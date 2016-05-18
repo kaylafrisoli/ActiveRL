@@ -94,16 +94,24 @@ BlockBySubstr <- function(records, var.names, n.chars=NULL) {
 BlockRlData <- function(RLdata,
                         var.names,
                         n.chars=NULL,
-                        unique.ids=NULL){
+                        unique.ids=NULL,
+                        pre.block.record=c(TRUE, FALSE)){
 
 
   options(expressions = 100000) # really should figure out what this means
 
   # full.comparisons <- matrix(NA, ncol = length(variables.to.match) + 3, nrow = choose(nrow(RLdata), 2))
+
+  pre.block.record <- match.arg(pre.block.record)
+
+  if(pre.block.record == TRUE){
+    RLdata$PreBlockRecord <- 1:nrow(RLdata)
+  }
+
   block.info <- BlockBySubstr(RLdata, var.names, n.chars)
   block.factors <- block.info$factors
 
-  RLdata$PreBlockRecord <- 1:nrow(RLdata)
+  # RLdata$PreBlockRecord <- 1:nrow(RLdata)
   dsplit1 <- split(RLdata, block.factors)
   dsplit <- dsplit1[which(as.numeric(table(block.factors)) >= 2)]
   dsplit.singles <- MergeAllBlocks(dsplit1[which(as.numeric(table(block.factors)) < 2)])
@@ -166,6 +174,7 @@ BlockRlDataAdapt <- function(RLdata,
     max.size <- max.size
   }
 
+  RLdata$PreBlockRecord <- 1:nrow(RLdata)
   RLdata.loop <- RLdata
   id.loop <- unique.ids
 
@@ -183,7 +192,8 @@ BlockRlDataAdapt <- function(RLdata,
     block.info <- BlockRlData(RLdata.loop,
                               var.names[1:i],
                               n.chars[1:i],
-                              id.loop)
+                              id.loop,
+                              pre.block.record = FALSE)
 
     # block.too.big <- which(as.numeric(table(block.info$BlockInfo$blocks)) > max.size)
     block.just.right <- which(as.numeric(table(block.info$BlockInfo$blocks)) <= max.size)
