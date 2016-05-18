@@ -102,8 +102,6 @@ BlockRlData <- function(RLdata,
 
   # full.comparisons <- matrix(NA, ncol = length(variables.to.match) + 3, nrow = choose(nrow(RLdata), 2))
 
-  pre.block.record <- match.arg(pre.block.record)
-
   if(pre.block.record == TRUE){
     RLdata$PreBlockRecord <- 1:nrow(RLdata)
   }
