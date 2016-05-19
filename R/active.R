@@ -124,11 +124,11 @@ BuildATrainingDataset <- function(RLdata,
   if(is.null(standardized.variables)){
     factor.vars <- names(which(sapply(RLdata[, unique(variables.to.match)], is.factor) == TRUE))
     factor.vars <- variables.to.match %>%
-                    unique() %>%
-                     RLdata[, .] %>%
-                      sapply(., is.factor) %>%
-                       which(. == TRUE) %>%
-                        names()
+      unique() %>%
+      RLdata[, .] %>%
+      sapply(., is.factor) %>%
+      which(. == TRUE) %>%
+      names()
     std.cols <- which(variables.to.match %in% factor.vars)
   } else{
     std.cols <- which(variables.to.match %in% standardized.variables)
@@ -223,7 +223,16 @@ BuildATrainingDatasetAuto <- function(RLdata,
                                       initial.matching.scheme=NULL,
                                       record.id=NULL,
                                       user.accuracy=NULL,
-                                      uncertainty.param=NULL){
+                                      uncertainty.param=NULL,
+                                      seed=NULL){
+
+  if(is.null(seed)){
+    seed <- sample(1:100000, 1)
+  } else{
+    seed <- seed
+  }
+
+  set.seed(seed)
 
   if(is.null(n.pairs.to.test)){
     n.pairs.to.test <- 100
@@ -290,7 +299,7 @@ BuildATrainingDatasetAuto <- function(RLdata,
   initial.untested <- comparisons[-c(sims.to.test$n), ]
 
   # how are we going to initially match the 1000
-  if(is.null(initial.matching.scheme)){
+  if (is.null(initial.matching.scheme)) {
     initial.matching.scheme <- (initial.sample$average.similarity > .98) |
       (initial.sample$average.similarity > .95 & initial.sample$date_of_death.Abs < 40) |
       (initial.sample$average.similarity > .90 & initial.sample$date_of_death.Abs < 10) |
@@ -388,12 +397,13 @@ BuildATrainingDatasetAuto <- function(RLdata,
 
 
 
-  results <- list(comparisons=comparisons,
+  results <- list(comparisons = comparisons,
                   untested.comparisons = initial.untested,
                   tested.comparisons = initial.sample,
                   final.glm = glm.model,
                   final.test.preds = test.preds,
-                  untested.eval = untested.eval)
+                  untested.eval = untested.eval,
+                  seed = seed)
   return(results)
 
 
