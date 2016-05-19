@@ -11,4 +11,5 @@ RoxygenNote: 5.0.1
 Imports: gtools,
     plyr,
     magrittr,
-    doMC
+    doMC,
+    RecordLinkage

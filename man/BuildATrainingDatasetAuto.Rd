@@ -7,7 +7,8 @@
 BuildATrainingDatasetAuto(RLdata, block.comparisons, standardized.variables,
   model.formula, n.pairs.to.test = NULL, n.per.stage = NULL,
   n.initial.stage = NULL, initial.matching.scheme = NULL,
-  record.id = NULL, user.accuracy = NULL, uncertainty.param = NULL)
+  record.id = NULL, user.accuracy = NULL, uncertainty.param = NULL,
+  seed = NULL)
 }
 \arguments{
 \item{RLdata}{a data frame containing the records to be matched}
