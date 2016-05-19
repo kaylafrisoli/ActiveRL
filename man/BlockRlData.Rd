@@ -4,7 +4,8 @@
 \alias{BlockRlData}
 \title{Block a record linkage dataset}
 \usage{
-BlockRlData(RLdata, var.names, n.chars = NULL, unique.ids = NULL)
+BlockRlData(RLdata, var.names, n.chars = NULL, unique.ids = NULL,
+  pre.block.record = c(TRUE, FALSE))
 }
 \arguments{
 \item{RLdata}{a data frame containing the records to be matched}

@@ -19,5 +19,6 @@ Prompt the user to input yes or no (y/n) if two records match
 }
 \examples{
 IsItAMatch(RLdata500[1, ], RLdata[2, ])
+
 }
 
