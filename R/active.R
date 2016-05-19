@@ -187,6 +187,14 @@ BuildATrainingDataset <- function(RLdata,
 }
 
 
+which.n.closest.to <- function(n, vec, k){
+  ab.dif <- abs(vec - k)
+  which.in <- which(ab.dif %in% sort(ab.dif)[1:n])
+  return(sample(which.in, n))
+
+}
+
+
 
 #' Build a training dataset automatically
 #'
