@@ -257,15 +257,7 @@ BuildATrainingDatasetAuto <- function(RLdata,
     record.id <- record.id
   }
 
-  # how are we going to initially match the 1000
-  if(is.null(initial.matching.scheme)){
-    initial.matching.scheme <- (initial.sample$average.similarity > .98) |
-      (initial.sample$average.similarity > .95 & initial.sample$date_of_death.Abs < 40) |
-      (initial.sample$average.similarity > .90 & initial.sample$date_of_death.Abs < 10) |
-      (initial.sample$average.similarity > .8 & initial.sample$date_of_death.Abs == 0)
-  } else {
-    initial.matching.scheme <- initial.matching.scheme
-  }
+
 
   #comparisons
   comparisons <- block.comparisons
@@ -296,6 +288,16 @@ BuildATrainingDatasetAuto <- function(RLdata,
 
   # we need the untested comparisons
   initial.untested <- comparisons[-c(sims.to.test$n), ]
+
+  # how are we going to initially match the 1000
+  if(is.null(initial.matching.scheme)){
+    initial.matching.scheme <- (initial.sample$average.similarity > .98) |
+      (initial.sample$average.similarity > .95 & initial.sample$date_of_death.Abs < 40) |
+      (initial.sample$average.similarity > .90 & initial.sample$date_of_death.Abs < 10) |
+      (initial.sample$average.similarity > .8 & initial.sample$date_of_death.Abs == 0)
+  } else {
+    initial.matching.scheme <- initial.matching.scheme
+  }
 
 
   # initial matches are 1, non matches are 0
