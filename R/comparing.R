@@ -339,7 +339,7 @@ AbsoluteDifference <- function(vec1, vec2){
 }
 
 AbsoluteDifferenceDate <- function(vec1, vec2){
-  ab.dif <- as.numeric(abs(difftime(vec1 , vec2, units="days")))
+  ab.dif <- round(as.numeric(abs(difftime(vec1 , vec2, units="days"))))
   return(ab.dif)
 }
 
