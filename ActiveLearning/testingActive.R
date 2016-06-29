@@ -53,6 +53,13 @@ factor.vars <- variables.to.match %>%
 average.similarity <- apply(comp[1:50, cls2], 1, mean, na.rm=T)
 
 
+
+cut.avg.sims <- cut(average.similarity, breaks=seq(0, 1, .1), include.lowest = TRUE, right=FALSE)
+table(cut.avg.sims)
+
+
+
+
 avg.sims <- data.frame(n=1:length(average.similarity), avg.sim=average.similarity)
 
 avg.sims <- avg.sims[order(avg.sims$avg.sim),]

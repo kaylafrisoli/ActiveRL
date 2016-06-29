@@ -1,23 +1,23 @@
-# BasicRL
+# ActiveRL
 
-# BasicRL - R package for record linkage 
+# ActiveRL - R package for record linkage 
 
 
 
 ## Installation
 
-Installation of BasicRL is done through the `devtools` package in R. You will need to download the package if you have never done so before using the command `install.packages("devtools")`.
+Installation of ActiveRL is done through the `devtools` package in R. You will need to download the package if you have never done so before using the command `install.packages("devtools")`.
 
 ```R
 library(devtools)
-install_github('kaylafrisoli/BasicRL')
+install_github('kaylafrisoli/ActiveRL')
 ```
 
 ## Description
 
 Record linkage is the process of identifying records corresponding to unique entities across multiple data sets. This is necessary because records within a data set may not share a unique identifier, such as social security number or licence plate number. Record linkage is a common problem in many fields. For example, if two airlines merge they may want to link their flight records to gain information on their customers. They would need to decide if Sam Smith with birth date 05/15/86 is the same person as Samuel Smyth with birth date 05/16/86. Record linkage is especially important for government organizations like the U.S. Census Bureau, who require accurate linkages of information across their many data sources.
 
-BasicRL provides the tools to perform record linkage on a data set of records. If you have training data you can utilize current supervised learning methods to create unique ids for your testing data. If not, you can create your own training data and then utilize the same methods to create unique ids. 
+ActiveRL provides the tools to perform record linkage on a data set of records. If you have training data you can utilize current supervised learning methods to create unique ids for your testing data. If not, you can create your own training data and then utilize the same methods to create unique ids. 
 
 We build our own training data using an active learning approach that allows users to create their own optimized training datasets for specific record linkage problems. Our algorithm prompts users to label record-pairs for which its predictions are most uncertain, increasing the resulting classifier’s predictive power. There is much work to be done in this section and we are continually learning more about active learning, and how to handle situations wtih imbalanced classes (more record non-matches than record matches).
 
@@ -27,7 +27,7 @@ We build our own training data using an active learning approach that allows use
 We will walk through an example from a data set built in to the `RecordLinkage` package in R. You will need to install this package if you do not already have it.
 
 ```R
-library(BasicRL)
+library(ActiveRL)
 library(RecordLinkage)
 data("RLdata500")
 ids <- identity.RLdata500

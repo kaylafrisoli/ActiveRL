@@ -26,7 +26,7 @@ subsetRLdata <- fullRL[smaller.subset, ]
 
 
 createTraining <- BuildATrainingDataset(subsetRLdata,
-                                        n.pairs.to.test=10,
+                                        n.pairs.to.test=30,
                                         variables.to.match = c("fname_c1",
                                                                "lname_c1",
                                                                "by",
