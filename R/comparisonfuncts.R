@@ -87,10 +87,8 @@ StandardizedAbsoluteDifferenceY <- function(vec1, vec2){
 
 
 ExactMatch <- function(vec1, vec2){
-
   exact.match <- 1* (vec1 == vec2)
   return(exact.match)
-
 }
 
 
