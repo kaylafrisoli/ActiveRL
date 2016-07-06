@@ -109,12 +109,9 @@ BlockRlData <- function(RLdata,
   block.info <- BlockBySubstr(RLdata, var.names, n.chars)
   block.factors <- block.info$factors
 
-  # RLdata$PreBlockRecord <- 1:nrow(RLdata)
   dsplit1 <- split(RLdata, block.factors)
   dsplit <- dsplit1[which(as.numeric(table(block.factors)) >= 2)]
   dsplit.singles <- MergeAllBlocks(dsplit1[which(as.numeric(table(block.factors)) < 2)])
-
-
 
 
   if(is.null(unique.ids)){

@@ -22,23 +22,6 @@ GetPairwiseMatchesFromIDs <- function(combinations.of.original.data,
 }
 
 
-# assume no intransitive matches
-# GetIDsFromPairwiseMatches <- function(unique.combinations, match1){
-#   uniq.ids <- rep(NA, length(unique(c(unique.combinations[,1],
-#                                       unique.combinations[,2]))))
-#   for(i in 1:seq_along(match1)){
-#     if(match1[i] == 1){
-#       uniq.ids[unique.combinations[i, 1]] <- unique.combinations[i, 1]
-#       uniq.ids[unique.combinations[i, 2]] <- unique.combinations[i, 1]
-#     } else{
-#       uniq.ids[unique.combinations[i, 2]] <- unique.combinations[i, 2]
-#     }
-#
-# uniq.ids[i] <-
-#
-#   }
-#
-# }
 
 
 
@@ -272,94 +255,6 @@ BlockAndCompareCombinations <- function(RLdata,
 
 
 
-StandardizeBetween01 <- function(x, our.max, our.min=NULL){
-  if(is.null(our.min)){
-    our.min <- 0
-  } else{
-    our.min <- our.min
-  }
-  our.min <- as.numeric(our.min)
-  our.max <- as.numeric(our.max)
-  x <- as.vector(x)
-  (x-our.max)/(our.min-our.max)
-}
-
-
-
-AbsoluteDistance <- function(vec1, vec2){
-  vec1 <- as.numeric(vec1)
-  vec2 <- as.numeric(vec2)
-  max.val <- max(c(vec1, vec2))
-  ab.dist <- abs(vec1 - vec2)
-  min.dist <- pmin(ab.dist, max.val-ab.dist)
-  return(min.dist)
-}
-
-StandardizedAbsoluteDistance <- function(vec1, vec2){
-  vec1 <- as.numeric(vec1)
-  vec2 <- as.numeric(vec2)
-  max.val <- max(c(vec1, vec2))
-  ab.dist <- abs(vec1 - vec2)
-  min.dist <- pmin(ab.dist, max.val-ab.dist)
-
-  # Standardize
-  return(StandardizeBetween01(min.dist))
-}
-
-
-
-StandardizedAbsoluteDistanceM <- function(vec1, vec2){
-  vec1 <- as.numeric(vec1)
-  vec2 <- as.numeric(vec2)
-  max.val <- max(c(vec1, vec2))
-  ab.dist <- abs(vec1 - vec2)
-  min.dist <- pmin(ab.dist, max.val-ab.dist)
-
-  # Standardize
-  return(StandardizeBetween01(min.dist, 12))
-}
-
-
-StandardizedAbsoluteDistanceD <- function(vec1, vec2){
-  vec1 <- as.numeric(vec1)
-  vec2 <- as.numeric(vec2)
-  max.val <- max(c(vec1, vec2))
-  ab.dist <- abs(vec1 - vec2)
-  min.dist <- pmin(ab.dist, max.val-ab.dist)
-
-  # Standardize
-  return(StandardizeBetween01(min.dist, 31))
-}
-
-
-
-AbsoluteDifference <- function(vec1, vec2){
-  ab.dif <- as.numeric(abs(as.numeric(vec1)-as.numeric(vec2)))
-  return(ab.dif)
-}
-
-AbsoluteDifferenceDate <- function(vec1, vec2){
-  ab.dif <- round(as.numeric(abs(difftime(vec1 , vec2, units="days"))))
-  return(ab.dif)
-}
-
-
-
-StandardizedAbsoluteDifference <- function(vec1, vec2){
-  ab.dif <- abs(as.numeric(vec1)-as.numeric(vec2))
-  return(StandardizeBetween01(ab.dif))
-}
-
-StandardizedAbsoluteDifferenceY <- function(vec1, vec2){
-  ab.dif <- abs(as.numeric(vec1)-as.numeric(vec2))
-  return(StandardizeBetween01(ab.dif, max(c(vec1, vec2, 65))))
-}
-
-
-
-
-
-
 #' Compare unique combinations of records in all blocks
 #'
 #' Compare unique combinations of records within every block of a dataset
@@ -382,27 +277,27 @@ CompareAllBlocksInLoop <- function(Dsplit,
                                    string.comparators=NULL,
                                    record.ids.to.keep=NULL){
 
-block.comparison.lists <- vector("list", length(Dsplit))
+  block.comparison.lists <- vector("list", length(Dsplit))
 
-for(i in seq_along(Dsplit)){
+  for(i in seq_along(Dsplit)){
 
-#   ids.for.loop <- vector("list", length(Dsplit))
-  if(is.null(Idsplit)){
-    ids.for.loop <- NULL
-  } else{
-    ids.for.loop <- Idsplit[[i]]
+    #   ids.for.loop <- vector("list", length(Dsplit))
+    if(is.null(Idsplit)){
+      ids.for.loop <- NULL
+    } else{
+      ids.for.loop <- Idsplit[[i]]
+    }
+
+    comparison.in.block <- CompareUniqueCombinations(as.data.frame(Dsplit[[i]]),
+                                                     as.vector(ids.for.loop),
+                                                     variables.to.match = variables.to.match,
+                                                     string.comparators = string.comparators,
+                                                     record.ids.to.keep = record.ids.to.keep)
+
+    block.comparison.lists[[i]] <- as.data.frame(comparison.in.block)
   }
 
-  comparison.in.block <- CompareUniqueCombinations(as.data.frame(Dsplit[[i]]),
-                                                  as.vector(ids.for.loop),
-                                                  variables.to.match = variables.to.match,
-                                                  string.comparators = string.comparators,
-                                                  record.ids.to.keep = record.ids.to.keep)
-
-  block.comparison.lists[[i]] <- as.data.frame(comparison.in.block)
-}
-
-return(block.comparison.lists)
+  return(block.comparison.lists)
 
 }
 
@@ -454,10 +349,10 @@ CompareAllBlocksInLoopPC <- function(Dsplit,
     }
 
     comparison.in.block <- as.data.frame(CompareUniqueCombinations(as.data.frame(Dsplit[[i]]),
-                                                     as.vector(ids.for.loop),
-                                                     variables.to.match = variables.to.match,
-                                                     string.comparators = string.comparators,
-                                                     record.ids.to.keep = record.ids.to.keep))
+                                                                   as.vector(ids.for.loop),
+                                                                   variables.to.match = variables.to.match,
+                                                                   string.comparators = string.comparators,
+                                                                   record.ids.to.keep = record.ids.to.keep))
 
   }
 
@@ -467,7 +362,7 @@ CompareAllBlocksInLoopPC <- function(Dsplit,
 
 
 
-#make sure all elements of block.comparison.list are a data.frame
+
 
 
 
