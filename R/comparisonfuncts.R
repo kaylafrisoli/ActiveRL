@@ -83,3 +83,18 @@ StandardizedAbsoluteDifferenceY <- function(vec1, vec2){
   ab.dif <- abs(as.numeric(vec1)-as.numeric(vec2))
   return(StandardizeBetween01(ab.dif, max(c(vec1, vec2, 65))))
 }
+
+
+
+ExactMatch <- function(vec1, vec2){
+
+  exact.match <- 1* (vec1 == vec2)
+  return(exact.match)
+
+}
+
+
+
+
+
+
