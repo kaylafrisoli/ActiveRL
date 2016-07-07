@@ -18,6 +18,6 @@ The probability that the two records match
 Prompt the user to input the probability that two records match
 }
 \examples{
-ProbItsAMatch(RLdata500[1, ], RLdata[2, ])
+ProbItsAMatch(RLdata500[1, ], RLdata500[2, ])
 }
 

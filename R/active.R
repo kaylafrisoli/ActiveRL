@@ -208,7 +208,7 @@ IsItAMatch <- function(record1, record2) {
 #' #'
 #' #' @param n.pairs.to.test an integer corresponding to the number of pairs of records the user wants to test
 #' #'
-#' #' @param record.ids a vector of strings corresponding to the variable names that will contain the pairwise combinations of records. The default (which is produced using CompareUniqueCombinations) is c("CurrentRecord1", "CurrentRecord2").
+#' #' @param record.ids a vector of strings corresponding to the variable names that will contain the pairwise combinations of records in the data. The default (which is produced using CompareUniqueCombinations) is c("CurrentRecord1", "CurrentRecord2").
 #' #'
 #' #' @param standardized.variables a vector of strings containing the names of all standardized variables. The comparison values for these variables will be averaged. The default is all factor variables in RLdata.
 #' #'
@@ -754,6 +754,8 @@ ApplyIsItAMatch <- function(x, data, record.id){
 # with no training data
 # not trying to simulate any type of accuracy
 
+# RLdata should be NOT block data
+
 BuildTrainingDataAndModel <- function(RLdata,
                                          block.comparisons,
                                          standardized.variables,
@@ -903,10 +905,8 @@ BuildTrainingDataAndModel <- function(RLdata,
     stage.comparisons <- initial.untested[closest.preds,]
     stage.comparisons$stage <- paste('stage', i, sep = "")
 
-    merged.data <- MergeAllBlocks(RLdata)
-
     stage.matches <- apply(stage.comparisons, 1, ApplyIsItAMatch,
-                           data=merged.data, record.id=record.id)
+                           data=RLdata, record.id=record.id)
 
     stage.comparisons$Active_Match <-
       as.numeric(ifelse(stage.matches == "y", 1, 0 ))
@@ -993,6 +993,7 @@ BuildTrainingDataAndModel <- function(RLdata,
 
 
 BuildTrainingClusterFull <- function(RLdata,
+                                     RLdata.blocked,
                                   block.comparisons,
                                   standardized.variables,
                                   model.formula,
@@ -1141,10 +1142,8 @@ BuildTrainingClusterFull <- function(RLdata,
     stage.comparisons <- initial.untested[closest.preds,]
     stage.comparisons$stage <- paste('stage', i, sep = "")
 
-    merged.data <- MergeAllBlocks(RLdata)
-
     stage.matches <- apply(stage.comparisons, 1, ApplyIsItAMatch,
-                           data=merged.data, record.id=record.id)
+                           data=RLdata, record.id=record.id)
 
     stage.comparisons$Active_Match <-
       as.numeric(ifelse(stage.matches == "y", 1, 0 ))
@@ -1219,7 +1218,7 @@ BuildTrainingClusterFull <- function(RLdata,
 
   hclust.all <- AllBlocksHclustCutGLMNew(glm.model,
                                          block.comparisons,
-                                         RLdata,
+                                         RLdata.blocked,
                                          cut.threshold)
 
   blocks.hclust.IDS <- hclust.all$block.hclust.ids
