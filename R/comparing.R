@@ -75,7 +75,7 @@ CompareUniqueCombinations <- function(RLdata,
   final.matrix <- matrix(NA, ncol = cols + 3 + n.extra.cols, nrow = choose(rows, 2))
   # put the unique combinations into our final matrix for future use
   # when we use a function that is part of our dependencies we use package::fun()
-  final.matrix[, comb.cols] <- gtools::combinations(rows, 2)
+  final.matrix[, comb.cols] <- caTools::combs(1:rows, 2)
 
   for (i in 1:cols) {
     # extract only the unique values from field of interest
@@ -83,7 +83,7 @@ CompareUniqueCombinations <- function(RLdata,
 
     # is there more than 1 unique value?
     if (length(unique.entities) > 1) {
-      unique.combs <- gtools::combinations(length(unique.entities), 2)
+      unique.combs <- caTools::combs(1:length(unique.entities), 2)
       my.combs <- apply(unique.combs, 2, function(x) as.character(unique.entities[x]))
       # access my.combs as a matrix even if there are just two values in it
       my.combs <- matrix(my.combs, ncol=2)

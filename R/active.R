@@ -73,6 +73,35 @@ IsItAMatch <- function(record1, record2) {
 
 }
 
+ApplyIsItAMatch <- function(x, data, record.id){
+  y.n <- IsItAMatch(data[x[ record.id[1]], ], data[x[record.id[2]], ])
+  return(y.n)
+}
+
+
+#' @export
+AreTheyMatches <- function(records) {
+  print("If two records do not come from the same entity then they are not a match.")
+  print("If two records come from the same entity then they are a match.")
+  
+  n <- nrow(records)
+  y.n.match <- rep(NA, n)
+  # can be data.frame or data.table
+  records <- data.frame(Line = 1:n, records)
+  
+  print(records)
+  for(i in 1:n){
+    y.n.match[i] <-
+      readline(paste0("Are the records in line ", i, " a match? y/n? ")) 
+  }
+  return(y.n.match)
+}
+
+ApplyIsItAMatch <- function(x, data, record.id){
+  y.n <- IsItAMatch(data[x[ record.id[1]], ], data[x[record.id[2]], ])
+  return(y.n)
+}
+
 
 
 
@@ -742,12 +771,6 @@ BuildATrainingDatasetAuto <- function(RLdata,
 
 
 
-ApplyIsItAMatch <- function(x, data, record.id){
-  y.n <- IsItAMatch(data[x[ record.id[1]], ], data[x[record.id[2]], ])
-  return(y.n)
-}
-
-
 
 
 
@@ -756,6 +779,9 @@ ApplyIsItAMatch <- function(x, data, record.id){
 
 # RLdata should be NOT block data
 
+#' Build training data actively
+#'
+#' @export
 BuildTrainingDataAndModel <- function(RLdata,
                                          block.comparisons,
                                          standardized.variables,
@@ -991,7 +1017,9 @@ BuildTrainingDataAndModel <- function(RLdata,
 # Build Training, Predict on Remaining, HCLUST, Give UIDS
 #########################################################
 
-
+#' Get unique ids actively
+#'
+#' @export
 BuildTrainingClusterFull <- function(RLdata,
                                      RLdata.blocked,
                                   block.comparisons,

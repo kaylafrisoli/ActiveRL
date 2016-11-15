@@ -226,6 +226,3 @@ BlockRlDataAdapt <- function(RLdata,
 }
 
 
-
-
-
