@@ -83,16 +83,16 @@ ApplyIsItAMatch <- function(x, data, record.id){
 AreTheyMatches <- function(records) {
   print("If two records do not come from the same entity then they are not a match.")
   print("If two records come from the same entity then they are a match.")
-  
+
   n <- nrow(records)
   y.n.match <- rep(NA, n)
   # can be data.frame or data.table
   records <- data.frame(Line = 1:n, records)
-  
+
   print(records)
   for(i in 1:n){
     y.n.match[i] <-
-      readline(paste0("Are the records in line ", i, " a match? y/n? ")) 
+      readline(paste0("Are the records in line ", i, " a match? y/n? "))
   }
   return(y.n.match)
 }
@@ -1275,6 +1275,259 @@ BuildTrainingClusterFull <- function(RLdata,
 
 
 
+
+
+
+
+
+
+
+
+
+#########################################################
+# Fellegi to initialize, Build Training, Predict on Remaining, HCLUST, Give UIDS
+#########################################################
+
+#' Get unique ids actively
+#'
+#' make sure n initial stage is > 200
+#' #' #' @param record.ids a vector of strings corresponding to the variable names that will contain the pairwise combinations of records in the data. The default (which is produced using CompareUniqueCombinations) is c("CurrentRecord1", "CurrentRecord2").
+#' I think we want it to be PreBlockRecord if we've blocked?
+#' @export
+FSActiveFull <- function(RLdata,
+                         RLdata.blocked,
+                         block.comparisons,
+                         cols.for.fs,
+                         n.pairs.to.test = NULL,
+                         n.per.stage = NULL,
+                         n.initial.stage = NULL,
+                         record.id = NULL,
+                         uncertainty.param = NULL,
+                         seed = NULL,
+                         cut.threshold = NULL,
+                         save.self.matched=FALSE) {
+  ###############
+  # NULL business
+  ###############
+  if (is.null(cut.threshold)) {
+    cut.threshold <- .5
+  } else{
+    cut.threshold <- cut.threshold
+  }
+
+  if (is.null(seed)) {
+    seed <- sample(1:100000, 1)
+  } else{
+    seed <- seed
+  }
+
+  set.seed(seed)
+
+  if (is.null(n.pairs.to.test)) {
+    n.pairs.to.test <- 100
+  } else{
+    n.pairs.to.test <- n.pairs.to.test
+  }
+
+  if (is.null(n.per.stage)) {
+    n.per.stage <- 20
+  } else{
+    n.per.stage <- n.per.stage
+  }
+
+  if (is.null(n.initial.stage)) {
+    n.initial.stage <- 1000
+  } else{
+    n.initial.stage <- n.initial.stage
+  }
+
+  if (is.null(uncertainty.param)) {
+    uncertainty.param <- .5
+  } else{
+    uncertainty.param <- uncertainty.param
+  }
+
+  stages <- n.pairs.to.test / n.per.stage
+
+  print(stages)
+
+  if (is.null(record.id)) {
+    record.id <- c("PreBlockRecord1", "PreBlockRecord2")
+  } else{
+    record.id <- record.id
+  }
+
+  ##################################
+  # Fellegi Sunter
+  ##################################
+
+  comparisons <- MergeAllBlocks(block.comparisons)
+
+  data.for.fs <- comparisons[, cols.for.fs]
+
+  mywts2 <- FellegiSunter(data.for.fs,
+                          initial.m = rep(.97, length(cols.for.fs)),
+                          initial.u = apply(data.for.fs, 2, function(x) sum(x)/length(x)),
+                          initial.p = 1/sqrt(nrow(data.for.fs)) * 0.1)
+
+  # add fellegi sunter predictions to our comparisons
+  comparisons$FS <- ifelse(mywts2$log2.ratios > 0, 1, 0)
+
+  # add the stage to comparisons
+  comparisons$stage <- NA
+
+  # order the average similarities
+  fs.n <- length(comparisons$FS)
+  fs <- data.frame(n = 1:fs.n,
+                   fs.score = comparisons$FS)
+  avg.sims.ordered <- avg.sims[order(avg.sims$avg.sim), ]
+
+
+  #############################
+  # Create initial stage data
+  #############################
+
+  # Make sure we have at least 100 1's in initial sample
+  fs.ones <- which(comparisons$FS == 1)
+  fs.zeros <- which(comparisons$FS == 0)
+
+  # make sure n.initial.stage > 200
+  if(length(fs.ones) < 100){
+    rows.to.test <- c(fs.ones,
+                      sample(fs.zeros, n.initial.stage-length(fs.ones)))
+  } else{
+    rows.to.test <- c(sample(fs.ones, 100),
+                      sample(fs.zeros, n.initial.stage-100))
+  }
+
+  # Subset comparison matrix for initial stage
+  initial.sample <- comparisons[rows.to.test, ]
+  initial.sample$stage <- 'initial'
+
+  # Save untested comparisons
+  initial.untested <- comparisons[-c(rows.to.test),]
+
+
+  # initial matches are 1, non matches are 0
+  initial.sample$Active_Match <- initial.sample$FS
+
+  # in order to introduce some randomness we change 5 randomly
+  change.some <- sample(which(initial.sample$Active_Match == 1), 5)
+  initial.sample$Active_Match[change.some] <- 0
+
+  # we model our initial sample
+  glm.model <- glm(model.formula,
+                   data = initial.sample,
+                   family = binomial)
+
+  # get predictions on the untested comparisons from our original model
+  test.preds <- predict(glm.model, initial.untested, type = "response")
+
+
+  for (i in 1:stages) {
+
+    ###############
+    # Prompt user
+    ###############
+
+    # we want the n.per.stage closest values to .5
+    closest.preds <- WhichNClosestTo(n.per.stage,
+                                     test.preds,
+                                     uncertainty.param)
+
+    stage.comparisons <- initial.untested[closest.preds, ]
+    stage.comparisons$stage <- paste('stage', i, sep = "")
+
+    stage.matches <- apply(stage.comparisons, 1, ApplyIsItAMatch,
+                           data=RLdata, record.id=record.id)
+
+    stage.comparisons$Active_Match <-
+      as.numeric(ifelse(stage.matches == "y", 1, 0 ))
+
+    ##################
+    # Update samples
+    ##################
+
+    stage.comparison.match <-
+      sum(stage.comparisons$Active_Match == 1)
+    stage.comparison.nonmatch <-
+      sum(stage.comparisons$Active_Match == 0)
+
+    init.sample.match <-
+      which(initial.sample$Active_Match == 1 &
+              initial.sample$stage == 'initial')
+    init.sample.nonmatch <-
+      which(initial.sample$Active_Match == 0 &
+              initial.sample$stage == 'initial')
+
+    print(i)
+    print(c(
+      stage.comparison.match,
+      stage.comparison.nonmatch,
+      length(init.sample.match),
+      length(init.sample.nonmatch)
+    ))
+
+    if ((length(init.sample.match) > stage.comparison.match) &&
+        (length(init.sample.nonmatch) > stage.comparison.nonmatch)) {
+      get.rid.of <- c(
+        sample(init.sample.match, stage.comparison.match),
+        sample(init.sample.nonmatch, stage.comparison.nonmatch)
+      )
+      initial.sample <- initial.sample[-get.rid.of,]
+    } else if ((length(init.sample.match) < stage.comparison.match) &&
+               (length(init.sample.nonmatch) < stage.comparison.nonmatch)) {
+      initial.sample <- initial.sample
+    } else if ((length(init.sample.match) < stage.comparison.match)) {
+      get.rid.of <-
+        c(sample(init.sample.nonmatch, stage.comparison.nonmatch))
+      if (length(get.rid.of) > 0) {
+        initial.sample <- initial.sample[-get.rid.of,]
+      } else{
+        initial.sample <- initial.sample
+      }
+    } else{
+      get.rid.of <- c(sample(init.sample.match, stage.comparison.match))
+      if (length(get.rid.of) > 0) {
+        initial.sample <- initial.sample[-get.rid.of,]
+      } else{
+        initial.sample <- initial.sample
+      }
+    }
+
+    initial.sample <- rbind(initial.sample, stage.comparisons)
+    initial.untested <- initial.untested[-closest.preds,]
+
+    if(save.self.matched){
+      write.csv(initial.sample, 'self-matched-responses')
+    }
+
+    # build model
+    glm.model <- glm(model.formula,
+                     data = initial.sample,
+                     family = binomial)
+
+    test.preds <-
+      predict(glm.model, initial.untested, type = "response")
+
+  }
+
+  # NOW WE HAVE A FINAL MODEL
+
+  hclust.all <- AllBlocksHclustCutFS(glm.model,
+                                     block.comparisons,
+                                     RLdata.blocked,
+                                     cut.threshold)
+
+  blocks.hclust.IDS <- hclust.all$block.hclust.ids
+
+  results <- list(
+    blocks.hclust.IDS = blocks.hclust.IDS,
+    final.glm = glm.model,
+    seed = seed
+  )
+  return(results)
+}
 
 
 
