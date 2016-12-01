@@ -180,6 +180,64 @@ AllBlocksHclustCutGLM <- function(model,
 
 
 
+#' @export
+AllBlocksHclustCutFS <- function(model,
+                                  comparison.test.blocks,
+                                  test.data.blocks,
+                                  cut.threshold,
+                                  current.record.names=NULL){
+
+  if(is.null(current.record.names)){
+    current.record.names <- c("CurrentRecord1", "CurrentRecord2")
+  } else{
+    current.record.names <- current.record.names
+  }
+
+  block.hclust.ids <- vector("list", length(comparison.test.blocks))
+
+  for(i in seq_along(comparison.test.blocks)){
+
+    comparison.test.blocks[[i]] <- as.data.frame(comparison.test.blocks[[i]])
+    test.data.blocks[[i]] <- as.data.frame(test.data.blocks[[i]])
+
+    hclust.uids <- HclustCutGLM(model,
+                                comparison.test.blocks[[i]],
+                                test.data.blocks[[i]],
+                                cut.threshold)
+
+    block.hclust.ids[[i]] <- paste("block",
+                                   i,
+                                   "uid",
+                                   hclust.uids,
+                                   sep = "")
+
+    test.data.blocks[[i]]$HclustUID <- block.hclust.ids[[i]]
+
+    # pairwise.matches <-
+    #   GetPairwiseMatchesFromIDs(as.matrix(comparison.test.blocks[[i]]
+    #                                       [, which(colnames(comparison.test.blocks[[i]])
+    #                                                %in% current.record.names)]),
+    #                             as.vector(block.hclust.ids[[i]]))
+#
+#     comparison.test.blocks[[i]]$HclustMatch <- pairwise.matches
+  }
+#
+#
+#   merged.block.data <- MergeAllBlocks(test.data.blocks)
+#   merged.comparison.data <- MergeAllBlocks(comparison.test.blocks)
+
+  results <- list(block.hclust.ids=block.hclust.ids,
+                  # comparison.test.blocks=comparison.test.blocks,
+                  test.data.blocks=test.data.blocks)
+                  # merged.comparison.data=merged.comparison.data,
+                  # merged.block.data=merged.block.data)
+
+  return(results)
+
+}
+
+
+
 
 
 #######################
