@@ -98,21 +98,28 @@ BlockInPasses <- function(records, pass.structure) {
     new.combs <- sapply(orig.id.split[as.numeric(which(sapply(orig.id.split, length) > 1))],
                         caTools::combs, k=2)
     new.combs <- as.data.frame(do.call(rbind, new.combs))
+    new.combs <- data.frame(apply(new.combs, 1, min),
+                            apply(new.combs, 1, max))
     colnames(new.combs)= c("min.id", "max.id")
     new.combs$blockid <- paste(apply(pass.structure[[i]], 1, paste, collapse=""),
                                collapse = "")
-    # new.pairs <- do.call(rbind, new.combs)
-    # sorted.new <- data.frame(apply(new.pairs, 1, min),
-    #                          apply(new.pairs, 1, max))
-
-    pairs.to.compare <- merge(pairs.to.compare, new.combs, )
-
-
-
     pairs.to.compare <- rbind(pairs.to.compare, new.combs)
+    print(dim(pairs.to.compare))
+    pairs.to.compare <- pairs.to.compare[!duplicated(pairs.to.compare[1:2]), ]
+    print(dim(pairs.to.compare))
+    print(head(pairs.to.compare))
+  }
+
+
+
+    new.combs <- sapply(orig.id.split[as.numeric(which(sapply(orig.id.split, length) > 1))],
+                        caTools::combs, k=2)
+    pairs.to.compare <- rbind(pairs.to.compare, do.call(rbind, new.combs))
     print(dim(pairs.to.compare))
     pairs.to.compare <- as.matrix(unique(data.frame(apply(pairs.to.compare, 1, min),
                                                     apply(pairs.to.compare, 1, max))))
+
+
     print(dim(pairs.to.compare))
     # colnames(pairs.to.compare) <- NULL
     # pairs.to.compare <- unique.pairs
