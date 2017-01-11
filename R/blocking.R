@@ -63,8 +63,62 @@ BlockBySubstr <- function(records, var.names, n.chars=NULL) {
 }
 
 
+library(RecordLinkage)
+data("RLdata500")
+data("RLdata10000")
+head(RLdata500)
+pass.structure <- list(matrix(c("fname_c1", "lname_c1", NA, NA), ncol = 2),
+                       matrix(c("fname_c1", "by", NA, NA), ncol = 2),
+                       matrix(c("fname_c1", "lname_c1", 3, 4), ncol = 2),
+                       matrix(c("lname_c1", NA), ncol = 2))
+records <- RLdata500
+records <- RLdata10000
+BlockInPasses <- function(records, pass.structure) {
+  pairs.to.compare <- c()
+  records$record.ids <- 1:nrow(records)
+  for(i in 1:length(pass.structure)){
+    # get substrings if necessary
+    subs <- !is.na(pass.structure[[i]][, 2])
+    if(any(subs)){
+      f1 <- function(x){substr(x, start=1, stop=pass.structure[[i]][which(subs), 2])}
+      new.mat <- t(apply(as.matrix(records[, pass.structure[[i]][which(subs), 1]]), 1, f1))
+      new.mat <- cbind(new.mat, records[, pass.structure[[i]][which(!subs), 1]])
+    } else{
+      new.mat <- records[, pass.structure[[i]][, 1]]
+    }
+    # paste together strings to form blocks
+    if (length(pass.structure[[i]][, 1]) == 1){
+      blocks <- as.factor(new.mat)
+    } else {
+      blocks <- as.factor(apply(new.mat, 1, paste, collapse=""))
+      names(blocks) <- NULL
+    }
+    # split the ids into blocks and get combinations
+    orig.id.split <- split(records$record.ids, blocks)
+    new.combs <- sapply(orig.id.split[as.numeric(which(sapply(orig.id.split, length) > 1))],
+                        caTools::combs, k=2)
+    new.combs <- as.data.frame(do.call(rbind, new.combs))
+    colnames(new.combs)= c("min.id", "max.id")
+    new.combs$blockid <- paste(apply(pass.structure[[i]], 1, paste, collapse=""),
+                               collapse = "")
+    # new.pairs <- do.call(rbind, new.combs)
+    # sorted.new <- data.frame(apply(new.pairs, 1, min),
+    #                          apply(new.pairs, 1, max))
+
+    pairs.to.compare <- merge(pairs.to.compare, new.combs, )
 
 
+
+    pairs.to.compare <- rbind(pairs.to.compare, new.combs)
+    print(dim(pairs.to.compare))
+    pairs.to.compare <- as.matrix(unique(data.frame(apply(pairs.to.compare, 1, min),
+                                                    apply(pairs.to.compare, 1, max))))
+    print(dim(pairs.to.compare))
+    # colnames(pairs.to.compare) <- NULL
+    # pairs.to.compare <- unique.pairs
+  }
+  return(pairs.to.compare)
+}
 
 
 
