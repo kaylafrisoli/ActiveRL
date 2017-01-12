@@ -107,12 +107,9 @@ BlockInPasses <- function(records, pass.structure) {
       new.mat <- records[pass.structure[[i]][ 1]]
     }
     # paste together strings to form blocks
-    # if (length(pass.structure[[i]][, 1]) == 1){
-    #   blocks <- as.factor(new.mat)
-    # } else {
-      blocks <- as.factor(apply(new.mat, 1, paste, collapse=""))
-      names(blocks) <- NULL
-    # }
+    blocks <- as.factor(apply(new.mat, 1, paste, collapse=""))
+    names(blocks) <- NULL
+
     # split the ids into blocks and get combinations
     orig.id.split <- split(records$record.ids, blocks)
     new.combs <- as.data.frame(do.call(rbind,
