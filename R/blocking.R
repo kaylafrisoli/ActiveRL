@@ -87,20 +87,32 @@ BlockInPasses <- function(records, pass.structure) {
   for(i in 1:length(pass.structure)){
     # get substrings if necessary
     subs <- !is.na(pass.structure[[i]][, 2])
-    if(any(subs)){
-      f1 <- function(x){substr(x, start=1, stop=pass.structure[[i]][which(subs), 2])}
-      new.mat <- t(apply(as.matrix(records[, pass.structure[[i]][which(subs), 1]]), 1, f1))
-      new.mat <- cbind(new.mat, records[, pass.structure[[i]][which(!subs), 1]])
+    # because of data frame size differences we have to split into
+    # three cases even though we're doing the same thing
+    # if we are substringing 2+ variables, substring them and add them to the
+    # others (if there are any)
+    if(sum(subs) > 1){
+      f1 <- function(x){substr(x, start=1, stop=as.numeric(pass.structure[[i]][which(subs), 2]))}
+      new.mat <- t(apply(as.matrix(records[pass.structure[[i]][which(subs), 1]]), 1, f1))
+      new.mat <- cbind(new.mat, records[ pass.structure[[i]][which(!subs), 1]])
+    # if there is only one to be substringed, we don't need apply
+    }else if(sum(subs) == 1){
+      new.mat <- substr(as.matrix(records[pass.structure[[i]][which(subs), 1]]),
+                        start=1,
+                        stop=as.numeric(pass.structure[[i]][which(subs), 2]))
+      new.mat <- cbind(new.mat, records[ pass.structure[[i]][which(!subs), 1]])
+    # if we aren't substringing then we just subset our data to the variables
+    # we are blocking on
     } else{
-      new.mat <- records[, pass.structure[[i]][, 1]]
+      new.mat <- records[pass.structure[[i]][ 1]]
     }
     # paste together strings to form blocks
-    if (length(pass.structure[[i]][, 1]) == 1){
-      blocks <- as.factor(new.mat)
-    } else {
+    # if (length(pass.structure[[i]][, 1]) == 1){
+    #   blocks <- as.factor(new.mat)
+    # } else {
       blocks <- as.factor(apply(new.mat, 1, paste, collapse=""))
       names(blocks) <- NULL
-    }
+    # }
     # split the ids into blocks and get combinations
     orig.id.split <- split(records$record.ids, blocks)
     new.combs <- as.data.frame(do.call(rbind,
