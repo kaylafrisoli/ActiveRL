@@ -1297,6 +1297,7 @@ BuildTrainingClusterFull <- function(RLdata,
 FSActiveFull <- function(RLdata,
                          RLdata.blocked,
                          block.comparisons,
+                         model.formula,
                          cols.for.fs,
                          n.pairs.to.test = NULL,
                          n.per.stage = NULL,
@@ -1375,13 +1376,6 @@ FSActiveFull <- function(RLdata,
 
   # add the stage to comparisons
   comparisons$stage <- NA
-
-  # order the average similarities
-  fs.n <- length(comparisons$FS)
-  fs <- data.frame(n = 1:fs.n,
-                   fs.score = comparisons$FS)
-  avg.sims.ordered <- avg.sims[order(avg.sims$avg.sim), ]
-
 
   #############################
   # Create initial stage data

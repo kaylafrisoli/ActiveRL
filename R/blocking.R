@@ -62,17 +62,25 @@ BlockBySubstr <- function(records, var.names, n.chars=NULL) {
   return(results)
 }
 
-
-library(RecordLinkage)
-data("RLdata500")
-data("RLdata10000")
-head(RLdata500)
-pass.structure <- list(matrix(c("fname_c1", "lname_c1", NA, NA), ncol = 2),
-                       matrix(c("fname_c1", "by", NA, NA), ncol = 2),
-                       matrix(c("fname_c1", "lname_c1", 3, 4), ncol = 2),
-                       matrix(c("lname_c1", NA), ncol = 2))
-records <- RLdata500
-records <- RLdata10000
+#' Block a record linkage dataset in passes
+#'
+#' Block a record linkage dataset in passes of different blocking schemes
+#'
+#' @param records a data frame containing the records to be matched
+#'
+#' @param pass.structure a list containing a matrix for each pass where the first column of the matrix contains the variables to block on and the second column contains the number of characters to use (NA will use the entire variable)
+#'
+#' @return A data frame containing the ids of records we will compare and the blocking scheme used to choose them
+#'
+#' @examples
+#' BlockInPasses(RLdata10000, list(matrix(c("fname_c1", "lname_c1", NA, NA), ncol = 2),
+#'                                 matrix(c("fname_c1", "by", NA, NA), ncol = 2),
+#'                                 matrix(c("fname_c1", "lname_c1", 3, 4), ncol = 2),
+#'                                 matrix(c("lname_c1", NA), ncol = 2)))
+#'
+#' BlockInPasses(RLdata500, list(matrix(c("fname_c1", "lname_c1", "by", 1, 2, NA), ncol = 2)))
+#'
+#' @export
 BlockInPasses <- function(records, pass.structure) {
   pairs.to.compare <- c()
   records$record.ids <- 1:nrow(records)
@@ -95,39 +103,23 @@ BlockInPasses <- function(records, pass.structure) {
     }
     # split the ids into blocks and get combinations
     orig.id.split <- split(records$record.ids, blocks)
-    new.combs <- sapply(orig.id.split[as.numeric(which(sapply(orig.id.split, length) > 1))],
-                        caTools::combs, k=2)
-    new.combs <- as.data.frame(do.call(rbind, new.combs))
-    new.combs <- data.frame(apply(new.combs, 1, min),
-                            apply(new.combs, 1, max))
-    colnames(new.combs)= c("min.id", "max.id")
-    new.combs$blockid <- paste(apply(pass.structure[[i]], 1, paste, collapse=""),
-                               collapse = "")
+    new.combs <- as.data.frame(do.call(rbind,
+                                       sapply(orig.id.split[as.numeric(which(sapply(orig.id.split,
+                                                                                    length) > 1))],
+                                              caTools::combs, k=2)))
+    new.combs <- data.frame(min.id=apply(new.combs, 1, min),
+                            max.id=apply(new.combs, 1, max),
+                            blockid=paste(apply(pass.structure[[i]], 1, paste, collapse=""),
+                                          collapse = ""))
     pairs.to.compare <- rbind(pairs.to.compare, new.combs)
     print(dim(pairs.to.compare))
     pairs.to.compare <- pairs.to.compare[!duplicated(pairs.to.compare[1:2]), ]
     print(dim(pairs.to.compare))
     print(head(pairs.to.compare))
-  }
-
-
-
-    new.combs <- sapply(orig.id.split[as.numeric(which(sapply(orig.id.split, length) > 1))],
-                        caTools::combs, k=2)
-    pairs.to.compare <- rbind(pairs.to.compare, do.call(rbind, new.combs))
-    print(dim(pairs.to.compare))
-    pairs.to.compare <- as.matrix(unique(data.frame(apply(pairs.to.compare, 1, min),
-                                                    apply(pairs.to.compare, 1, max))))
-
-
-    print(dim(pairs.to.compare))
-    # colnames(pairs.to.compare) <- NULL
-    # pairs.to.compare <- unique.pairs
+    print(tail(pairs.to.compare))
   }
   return(pairs.to.compare)
 }
-
-
 
 
 #' Block a record linkage dataset

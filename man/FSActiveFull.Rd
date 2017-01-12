@@ -4,10 +4,10 @@
 \alias{FSActiveFull}
 \title{Get unique ids actively}
 \usage{
-FSActiveFull(RLdata, RLdata.blocked, block.comparisons, cols.for.fs,
-  n.pairs.to.test = NULL, n.per.stage = NULL, n.initial.stage = NULL,
-  record.id = NULL, uncertainty.param = NULL, seed = NULL,
-  cut.threshold = NULL, save.self.matched = FALSE)
+FSActiveFull(RLdata, RLdata.blocked, block.comparisons, model.formula,
+  cols.for.fs, n.pairs.to.test = NULL, n.per.stage = NULL,
+  n.initial.stage = NULL, record.id = NULL, uncertainty.param = NULL,
+  seed = NULL, cut.threshold = NULL, save.self.matched = FALSE)
 }
 \description{
 make sure n initial stage is > 200
