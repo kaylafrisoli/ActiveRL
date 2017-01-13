@@ -128,53 +128,46 @@ BlockInPasses <- function(records, pass.structure, verbose=FALSE) {
     if(verbose) print(paste0("splitting ids: ", time.taken))
 
     start.time <- Sys.time()
-    z <- sapply(orig.id.split[as.numeric(which(sapply(orig.id.split, length) > 1))],
-                sort)
-    x <- sapply(z, caTools::combs, k=2)
+    # z <- sapply(orig.id.split[as.numeric(which(sapply(orig.id.split, length) > 1))],
+    #             sort)
+    x <- lapply(orig.id.split[as.numeric(which(sapply(orig.id.split, length) > 1))],
+                caTools::combs, k=2)
+
     end.time <- Sys.time()
     time.taken <- end.time - start.time
     if(verbose) print(paste0("getting combos: ", time.taken))
 
-    for(j in y){
-      our.combs <- caTools::combs(orig.id.split[j], k=2)
-      new.combs <- data.frame(min.id=apply(our.combs, 1, min),
-                              max.id=apply(our.combs, 1, max),
-                              blockid=paste(apply(pass.structure[[i]], 1, paste, collapse=""),
-                                            collapse = ""))
-      pairs.to.compare <- rbind.fill(pairs.to.compare, new.combs)
-      pairs.to.compare <- pairs.to.compare[!duplicated(pairs.to.compare[1:2]), ]
-
+    start.time <- Sys.time()
+    for(k in 1:length(x)){
+      x[[k]] <- cbind(x[[k]], rep(names(x)[k], nrow(x[[k]])))
     }
-
-    start.time <- Sys.time()
-
-    new.combs <- plyr::rbind.fill.matrix(x)
-    # new.combs <- as.data.frame(do.call(rbind,
-    #                                    sapply(orig.id.split[as.numeric(which(sapply(orig.id.split,
-    #                                                                                 length) > 1))],
-    #                                           caTools::combs, k=2)))
     end.time <- Sys.time()
     time.taken <- end.time - start.time
-    if(verbose) print(paste0("getting combos: ", time.taken))
+    if(verbose) print(paste0("adding block names: ", time.taken))
 
     start.time <- Sys.time()
 
-    new.combs <- data.frame(min.id=apply(new.combs, 1, min),
-                            max.id=apply(new.combs, 1, max),
-                            blockid=paste(apply(pass.structure[[i]], 1, paste, collapse=""),
-                                          collapse = ""))
-    pairs.to.compare <- rbind(pairs.to.compare, new.combs)
+    new.combs <- as.data.frame(plyr::rbind.fill.matrix(x))
+    colnames(new.combs) <- c('min.id', 'max.id', 'blockid')
+    new.combs$passid <- paste(apply(pass.structure[[i]], 1, paste, collapse=""),
+                               collapse = "")
+    end.time <- Sys.time()
+    time.taken <- end.time - start.time
+    if(verbose) print(paste0("getting combos in order: ", time.taken))
+
+    start.time <- Sys.time()
+
+    pairs.to.compare <- plyr::rbind.fill(pairs.to.compare, new.combs)
     if(verbose) print(dim(pairs.to.compare))
     end.time <- Sys.time()
     time.taken <- end.time - start.time
-    if(verbose) print(paste0("order/combine: ", time.taken))
+    if(verbose) print(paste0("combine: ", time.taken))
 
    start.time <- Sys.time()
     pairs.to.compare <- pairs.to.compare[!duplicated(pairs.to.compare[1:2]), ]
     end.time <- Sys.time()
     time.taken <- end.time - start.time
     if(verbose) print(paste0("deduping: ", time.taken))
-
     if(verbose)  print(dim(pairs.to.compare))
   }
   return(pairs.to.compare)
