@@ -81,11 +81,13 @@ BlockBySubstr <- function(records, var.names, n.chars=NULL) {
 #' BlockInPasses(RLdata500, list(matrix(c("fname_c1", "lname_c1", "by", 1, 2, NA), ncol = 2)))
 #'
 #' @export
-BlockInPasses <- function(records, pass.structure) {
+BlockInPasses <- function(records, pass.structure, verbose=FALSE) {
   pairs.to.compare <- c()
   records$record.ids <- 1:nrow(records)
   for(i in 1:length(pass.structure)){
+    if(verbose) print(i)
     # get substrings if necessary
+    start.time <- Sys.time()
     subs <- !is.na(pass.structure[[i]][, 2])
     # because of data frame size differences we have to split into
     # three cases even though we're doing the same thing
@@ -104,28 +106,76 @@ BlockInPasses <- function(records, pass.structure) {
     # if we aren't substringing then we just subset our data to the variables
     # we are blocking on
     } else{
-      new.mat <- records[pass.structure[[i]][ 1]]
+      new.mat <- records[pass.structure[[i]][,1]]
     }
+    end.time <- Sys.time()
+    time.taken <- end.time - start.time
+    if(verbose) print(paste0("substringing: ", time.taken))
     # paste together strings to form blocks
+
+    start.time <- Sys.time()
     blocks <- as.factor(apply(new.mat, 1, paste, collapse=""))
     names(blocks) <- NULL
+    end.time <- Sys.time()
+    time.taken <- end.time - start.time
+    if(verbose) print(paste0("creating blocks: ", time.taken))
 
     # split the ids into blocks and get combinations
+    start.time <- Sys.time()
     orig.id.split <- split(records$record.ids, blocks)
-    new.combs <- as.data.frame(do.call(rbind,
-                                       sapply(orig.id.split[as.numeric(which(sapply(orig.id.split,
-                                                                                    length) > 1))],
-                                              caTools::combs, k=2)))
+    end.time <- Sys.time()
+    time.taken <- end.time - start.time
+    if(verbose) print(paste0("splitting ids: ", time.taken))
+
+    start.time <- Sys.time()
+    z <- sapply(orig.id.split[as.numeric(which(sapply(orig.id.split, length) > 1))],
+                sort)
+    x <- sapply(z, caTools::combs, k=2)
+    end.time <- Sys.time()
+    time.taken <- end.time - start.time
+    if(verbose) print(paste0("getting combos: ", time.taken))
+
+    for(j in y){
+      our.combs <- caTools::combs(orig.id.split[j], k=2)
+      new.combs <- data.frame(min.id=apply(our.combs, 1, min),
+                              max.id=apply(our.combs, 1, max),
+                              blockid=paste(apply(pass.structure[[i]], 1, paste, collapse=""),
+                                            collapse = ""))
+      pairs.to.compare <- rbind.fill(pairs.to.compare, new.combs)
+      pairs.to.compare <- pairs.to.compare[!duplicated(pairs.to.compare[1:2]), ]
+
+    }
+
+    start.time <- Sys.time()
+
+    new.combs <- plyr::rbind.fill.matrix(x)
+    # new.combs <- as.data.frame(do.call(rbind,
+    #                                    sapply(orig.id.split[as.numeric(which(sapply(orig.id.split,
+    #                                                                                 length) > 1))],
+    #                                           caTools::combs, k=2)))
+    end.time <- Sys.time()
+    time.taken <- end.time - start.time
+    if(verbose) print(paste0("getting combos: ", time.taken))
+
+    start.time <- Sys.time()
+
     new.combs <- data.frame(min.id=apply(new.combs, 1, min),
                             max.id=apply(new.combs, 1, max),
                             blockid=paste(apply(pass.structure[[i]], 1, paste, collapse=""),
                                           collapse = ""))
     pairs.to.compare <- rbind(pairs.to.compare, new.combs)
-    print(dim(pairs.to.compare))
+    if(verbose) print(dim(pairs.to.compare))
+    end.time <- Sys.time()
+    time.taken <- end.time - start.time
+    if(verbose) print(paste0("order/combine: ", time.taken))
+
+   start.time <- Sys.time()
     pairs.to.compare <- pairs.to.compare[!duplicated(pairs.to.compare[1:2]), ]
-    print(dim(pairs.to.compare))
-    print(head(pairs.to.compare))
-    print(tail(pairs.to.compare))
+    end.time <- Sys.time()
+    time.taken <- end.time - start.time
+    if(verbose) print(paste0("deduping: ", time.taken))
+
+    if(verbose)  print(dim(pairs.to.compare))
   }
   return(pairs.to.compare)
 }
