@@ -97,14 +97,14 @@ BlockInPasses <- function(records, pass.structure, verbose=FALSE) {
       f1 <- function(x){substr(x, start=1, stop=as.numeric(pass.structure[[i]][which(subs), 2]))}
       new.mat <- t(apply(as.matrix(records[pass.structure[[i]][which(subs), 1]]), 1, f1))
       new.mat <- cbind(new.mat, records[ pass.structure[[i]][which(!subs), 1]])
-    # if there is only one to be substringed, we don't need apply
+      # if there is only one to be substringed, we don't need apply
     }else if(sum(subs) == 1){
       new.mat <- substr(as.matrix(records[pass.structure[[i]][which(subs), 1]]),
                         start=1,
                         stop=as.numeric(pass.structure[[i]][which(subs), 2]))
       new.mat <- cbind(new.mat, records[ pass.structure[[i]][which(!subs), 1]])
-    # if we aren't substringing then we just subset our data to the variables
-    # we are blocking on
+      # if we aren't substringing then we just subset our data to the variables
+      # we are blocking on
     } else{
       new.mat <- records[pass.structure[[i]][,1]]
     }
@@ -113,8 +113,10 @@ BlockInPasses <- function(records, pass.structure, verbose=FALSE) {
     if(verbose) print(paste0("substringing: ", time.taken))
     # paste together strings to form blocks
 
+    new.mat2 <- na.omit(new.mat)
+
     start.time <- Sys.time()
-    blocks <- as.factor(apply(new.mat, 1, paste, collapse=""))
+    blocks <- as.factor(apply(new.mat2, 1, paste, collapse=""))
     names(blocks) <- NULL
     end.time <- Sys.time()
     time.taken <- end.time - start.time
@@ -122,7 +124,7 @@ BlockInPasses <- function(records, pass.structure, verbose=FALSE) {
 
     # split the ids into blocks and get combinations
     start.time <- Sys.time()
-    orig.id.split <- split(records$record.ids, blocks)
+    orig.id.split <- split(records$record.ids[complete.cases(new.mat)], blocks)
     end.time <- Sys.time()
     time.taken <- end.time - start.time
     if(verbose) print(paste0("splitting ids: ", time.taken))
@@ -149,8 +151,9 @@ BlockInPasses <- function(records, pass.structure, verbose=FALSE) {
 
     new.combs <- as.data.frame(plyr::rbind.fill.matrix(x))
     colnames(new.combs) <- c('min.id', 'max.id', 'blockid')
-    new.combs$passid <- paste(apply(pass.structure[[i]], 1, paste, collapse=""),
-                               collapse = "")
+    new.combs$passid <- gsub("NA", "",
+                             paste(apply(pass.structure[[i]], 1, paste, collapse=""),
+                                   collapse = ""))
     end.time <- Sys.time()
     time.taken <- end.time - start.time
     if(verbose) print(paste0("getting combos in order: ", time.taken))
@@ -163,7 +166,7 @@ BlockInPasses <- function(records, pass.structure, verbose=FALSE) {
     time.taken <- end.time - start.time
     if(verbose) print(paste0("combine: ", time.taken))
 
-   start.time <- Sys.time()
+    start.time <- Sys.time()
     pairs.to.compare <- pairs.to.compare[!duplicated(pairs.to.compare[1:2]), ]
     end.time <- Sys.time()
     time.taken <- end.time - start.time
