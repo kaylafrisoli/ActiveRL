@@ -148,7 +148,20 @@ evaluate_fast <- function(rl_ids, true_ids, outer_block_ids = NULL, verbose = F,
 }
 
 
+evaluate_missed <- function(true.ids, block.positions){
+  true.id.split <- split(1:length(true.ids), true.ids)
+  z <- true.id.split[as.numeric(which(sapply(true.id.split, length) > 1))]
+  x <- as.data.frame(plyr::rbind.fill.matrix(lapply(z, caTools::combs, k=2)))
 
+  trues <- do.call(paste, c(x, sep="."))
+  block.paste <- do.call(paste, c(block.positions, sep="."))
+
+  missed <- x[! (trues %in% block.paste), ]
+
+  results <- list(missed.pairs=missed,
+                  number.missed=nrow(missed))
+  return(results)
+}
 
 
 

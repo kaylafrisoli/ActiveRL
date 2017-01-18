@@ -22,11 +22,6 @@ GetPairwiseMatchesFromIDs <- function(combinations.of.original.data,
 }
 
 
-
-
-
-
-
 #' Compare Unique Combinations of Records
 #'
 #' Match records from a dataset using any comparison function on any set of variables
@@ -296,9 +291,7 @@ CompareAllBlocksInLoop <- function(Dsplit,
 
     block.comparison.lists[[i]] <- as.data.frame(comparison.in.block)
   }
-
   return(block.comparison.lists)
-
 }
 
 
