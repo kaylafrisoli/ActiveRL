@@ -81,7 +81,7 @@ BlockBySubstr <- function(records, var.names, n.chars=NULL) {
 #' BlockInPasses(RLdata500, list(matrix(c("fname_c1", "lname_c1", "by", 1, 2, NA), ncol = 2)))
 #'
 #' @export
-BlockInPasses <- function(records, pass.structure, swap.structure, verbose=FALSE) {
+BlockInPasses <- function(records, pass.structure, verbose=FALSE) {
   pairs.to.compare <- c()
   records$record.ids <- 1:nrow(records)
   for(i in 1:length(pass.structure)){
@@ -184,19 +184,25 @@ BlockInPasses <- function(records, pass.structure, swap.structure, verbose=FALSE
 #' @param records a data frame containing the records to be matched
 #'
 #' @param pass.structure a list containing a matrix for each pass where the first column of the matrix contains the variables to block on and the second column contains the number of characters to use (NA will use the entire variable)
+#' 
+#' @param swap.structure a list containing a vector for each pass where the elements are a 0 if that variable should not be swapped and a 1 if it should. The vector should have the same number of elements as variables in the pass block and can add to either 2 or 0 (either 2 variables will be swapped or none)
 #'
 #' @return A data frame containing the ids of records we will compare and the blocking scheme used to choose them
 #'
 #' @examples
-#' BlockInPasses(RLdata10000, list(matrix(c("fname_c1", "lname_c1", NA, NA), ncol = 2),
-#'                                 matrix(c("fname_c1", "by", NA, NA), ncol = 2),
-#'                                 matrix(c("fname_c1", "lname_c1", 3, 4), ncol = 2),
-#'                                 matrix(c("lname_c1", NA), ncol = 2)))
-#'
-#' BlockInPasses(RLdata500, list(matrix(c("fname_c1", "lname_c1", "by", 1, 2, NA), ncol = 2)))
+#' records <- data.frame(fname_c1=c("1949", "CARSTEN", "KAYLA", "KAYLA", "FRISOLI"),
+#'                       lname_c1=c("MEIER", "MEIER", "FRISOLI","FRISOLI", "KAYLA"),
+#'                       by= c("CARSTEN", "1949", "1993", "1993", "1993"),
+#'                       bm=c("7", "7", "6", "6", "3"),
+#'                       bd=c("22", "22", "12", "12", "10"))
+#' pass.structure <- list(matrix(c("fname_c1", "by", NA, NA), ncol = 2),
+#'                        matrix(c("fname_c1", "lname_c1", 3, 3), ncol = 2),
+#'                        matrix(c("lname_c1", NA), ncol = 2))
+#' swap.structure <- list(c(1, 1), c(1, 1), c(0))
+#' BlockInPassesSwap(records, pass.structure, swap.structure)
 #'
 #' @export
-BlockInPassesSwap <- function(records, pass.structure, swap.structure=NULL, verbose=FALSE) {
+BlockInPassesSwap <- function(records, pass.structure, swap.structure=NULL) {
   pairs.to.compare <- c()
   records$record.ids <- 1:nrow(records)
   
@@ -294,9 +300,6 @@ BlockInPassesSwap <- function(records, pass.structure, swap.structure=NULL, verb
   }
   return(pairs.to.compare)
 }
-
-
-
 
 
 
@@ -455,5 +458,3 @@ BlockRlDataAdapt <- function(RLdata,
                   IdSplitSingles = idsplit.singles)
   return(results)
 }
-
-
