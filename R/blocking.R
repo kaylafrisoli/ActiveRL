@@ -202,7 +202,7 @@ BlockInPasses <- function(records, pass.structure, verbose=FALSE) {
 #' BlockInPassesSwap(records, pass.structure, swap.structure)
 #'
 #' @export
-BlockInPassesSwap <- function(records, pass.structure, swap.structure=NULL) {
+BlockInPassesSwap <- function(records, pass.structure, swap.structure=NULL, verbose=FALSE) {
   pairs.to.compare <- c()
   records$record.ids <- 1:nrow(records)
   
