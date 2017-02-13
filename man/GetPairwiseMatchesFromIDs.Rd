@@ -22,5 +22,6 @@ Take a vector of unique IDs from original data set and convert to binary matches
 # return vector of nrow(our.combinations)
 our.combinations <- combinations(nrow(RLdata500), 2)
 GetPairwiseMatchesFromIDs(our.combinations, identity.RLdata500)
+
 }
 

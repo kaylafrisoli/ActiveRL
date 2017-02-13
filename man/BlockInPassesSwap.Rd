@@ -4,7 +4,8 @@
 \alias{BlockInPassesSwap}
 \title{Block a record linkage dataset in passes}
 \usage{
-BlockInPassesSwap(records, pass.structure, swap.structure = NULL)
+BlockInPassesSwap(records, pass.structure, swap.structure = NULL,
+  verbose = FALSE)
 }
 \arguments{
 \item{records}{a data frame containing the records to be matched}
