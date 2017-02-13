@@ -12,10 +12,18 @@
 #' # return vector of nrow(our.combinations)
 #' our.combinations <- combinations(nrow(RLdata500), 2)
 #' GetPairwiseMatchesFromIDs(our.combinations, identity.RLdata500)
+#'
+#' @export
 GetPairwiseMatchesFromIDs <- function(combinations.of.original.data,
                                       ids.from.original.data){
   # MUST be a matrix with 2 columns or it won't work with 2 variables
-  combinations.of.original.data <- matrix(combinations.of.original.data, ncol=2)
+  # combinations.of.original.data <- matrix(combinations.of.original.data, ncol=2)
+  # print(head(combinations.of.original.data))
+  # if(typeof(combinations.of.original.data) == "list"){
+  #   combinations.of.original.data <- as.matrix(combinations.of.original.data)
+  # }
+  # print(head(combinations.of.original.data))
+
   ids.from.original.data <- as.vector(ids.from.original.data)
   1 * (ids.from.original.data[combinations.of.original.data[, 1]] ==
          ids.from.original.data[combinations.of.original.data[, 2]])

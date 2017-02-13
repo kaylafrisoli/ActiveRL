@@ -285,6 +285,10 @@ BlockInPassesSwap <- function(records, pass.structure, swap.structure=NULL, verb
     new.combs.unsorted <- as.data.frame(plyr::rbind.fill.matrix(x))
     colnames(new.combs.unsorted) <- c('min.id', 'max.id', 'blockid')
     
+    new.combs.unsorted$min.id <- as.numeric(as.character(new.combs.unsorted$min.id))
+    new.combs.unsorted$max.id <- as.numeric(as.character(new.combs.unsorted$max.id))
+    
+    
     new.combs <- data.frame(min.id=apply(new.combs.unsorted[1:2], 1, min),
                             max.id=apply(new.combs.unsorted[1:2], 1, max),
                             blockid=new.combs.unsorted$blockid,
@@ -298,6 +302,8 @@ BlockInPassesSwap <- function(records, pass.structure, swap.structure=NULL, verb
     pairs.to.compare <- pairs.to.compare[!duplicated(pairs.to.compare[1:2]), ]
     if(verbose)  print(dim(pairs.to.compare))
   }
+  pairs.to.compare$min.id <- as.numeric(as.character(pairs.to.compare$min.id))
+  pairs.to.compare$max.id <- as.numeric(as.character(pairs.to.compare$max.id))
   return(pairs.to.compare)
 }
 
