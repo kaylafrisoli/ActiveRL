@@ -382,6 +382,53 @@ MergeAllBlocks <- function(block.lists){
 }
 
 
+#' Turn all continuous variables into binary
+#'
+#' @return A data frame
+#' @export
+ContToBin <- function(dat, cat.vars, cut.offs, inequals, keep.orig=FALSE){
+  for(i in 1:length(cat.vars)){
+    print(i)
+    if(inequals[i]=="ge"){
+      dat[paste0(cat.vars[i], ".bin")] <- ifelse(dat[, cat.vars[i]] >= cut.offs[i], 1, 0)
+    } else if(inequals[i] == "g"){
+      dat[paste0(cat.vars[i], ".bin")] <- ifelse(dat[, cat.vars[i]] > cut.offs[i], 1, 0)
+    } else if(inequals[i] == "le"){
+      dat[paste0(cat.vars[i], ".bin")] <- ifelse(dat[, cat.vars[i]] <= cut.offs[i], 1, 0)
+    } else if(inequals[i] == "l"){
+      dat[paste0(cat.vars[i], ".bin")] <- ifelse(dat[, cat.vars[i]] < cut.offs[i], 1, 0)
+    }
+
+    if(!keep.orig){
+      dat[, cat.vars[i]] <- NULL
+    }
+  }
+  return(dat)
+}
+
+CatToBins <- function(dat, cat.vars, sections=NULL, keep.orig=FALSE){
+  if(is.null(sections)){
+    for(i in 1:length(cat.vars)){
+      print(i)
+      breaks <- unique(quantile(dat[, cat.vars[i]]))
+      # breaks[2:4] <- breaks[2:4] + sort(sample(seq(0, .01, length.out = 10), 3))
+      labels <- paste0(cat.vars[i], ".p", 1:(length(breaks) -1))
+      temp <- cut(dat[, cat.vars[i]],
+                  breaks,
+                  labels,
+                  include.lowest = TRUE)
+      options(na.action='na.pass')
+      temp2 <- model.matrix(~temp-1, data=as.data.frame(temp))
+      colnames(temp2) <- labels
+      dat <- cbind(dat, temp2)
+      if(!keep.orig){
+        dat[, cat.vars[i]] <- NULL
+      }
+    }
+  }
+  return(dat)
+}
+
 
 
 
